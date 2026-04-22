@@ -1,19 +1,29 @@
-import { useEffect, useState } from "react"
-import { Text, View } from "react-native"
+import { Link, Stack } from 'expo-router'
+import { StyleSheet, Text, View } from 'react-native'
 
-import GoogleAuthButton from "../components/GoogleAuthButton"
-
-export default function Login() {
+export default function LoginScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Roomie</Text>
-      <GoogleAuthButton />
-    </View>
+    <>
+      <Stack.Screen options={{ title: 'Login' }} />
+      <View style={styles.container}>
+        <Text type="title">Login</Text>
+        <Link href="/home" style={styles.link}>
+          <Text type="link">Try to navigate to home screen!</Text>
+        </Link>
+      </View>
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  link: {
+    marginTop: 15,
+    paddingVertical: 15,
+  },
+})
