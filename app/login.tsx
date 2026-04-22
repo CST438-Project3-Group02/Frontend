@@ -1,4 +1,7 @@
-import { Text, View } from "react-native";
+import { useEffect, useState } from "react"
+import { Text, View } from "react-native"
+
+import GoogleAuthButton from "../components/GoogleAuthButton"
 
 export default function Login() {
   return (
@@ -9,7 +12,8 @@ export default function Login() {
         alignItems: "center",
       }}
     >
-      <Text>Login</Text>
+      <Text>Roomie</Text>
+      <GoogleAuthButton />
     </View>
-  );
+  )
 }
