@@ -11,16 +11,17 @@ import AuthProvider from '@/providers/auth-provider'
 function RootNavigator() {
   const { isLoggedIn } = useAuthContext()
 
-  console.log('isLoggedIn', isLoggedIn)
+  console.log('RootNavigator isLoggedIn:', isLoggedIn, typeof isLoggedIn)
+
   return (
     <Stack>
       <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)/index" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!isLoggedIn}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Screen name="+not-found" />
+      {/* <Stack.Screen name="+not-found" /> */}
     </Stack>
   )
 }
