@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+
 export type AuthData = {
   claims?: Record<string, any> | null
   profile?: any | null

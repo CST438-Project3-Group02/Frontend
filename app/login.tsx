@@ -1,15 +1,15 @@
 import { Link, Stack } from 'expo-router'
 import { StyleSheet, Text, View } from 'react-native'
 
+import GoogleSignInButton from '@/components/social-auth-buttons/google/GoogleSignInButton';
+
 export default function LoginScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Login' }} />
       <View style={styles.container}>
         <Text type="title">Login</Text>
-        <Link href="/home" style={styles.link}>
-          <Text type="link">Try to navigate to home screen!</Text>
-        </Link>
+        <GoogleSignInButton />
       </View>
     </>
   )

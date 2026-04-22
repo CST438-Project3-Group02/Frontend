@@ -10,6 +10,8 @@ import AuthProvider from '@/providers/auth-provider'
 // Separate RootNavigator so we can access the AuthContext
 function RootNavigator() {
   const { isLoggedIn } = useAuthContext()
+
+  console.log('isLoggedIn', isLoggedIn)
   return (
     <Stack>
       <Stack.Protected guard={isLoggedIn}>
@@ -25,7 +27,6 @@ function RootNavigator() {
 export default function RootLayout() {
   const colorScheme = useColorScheme()
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <ThemeProvider value={DefaultTheme}>
       <AuthProvider>
         <SplashScreenController />

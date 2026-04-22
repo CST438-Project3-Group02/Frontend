@@ -7,6 +7,8 @@ import { useAuthContext } from '@/hooks/use-auth-context'
 export default function HomeScreen() {
   const { profile } = useAuthContext()
 
+  console.log("profile: ", profile)
+
   return (
     <View>
       <View style={styles.titleContainer}>
