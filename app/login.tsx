@@ -1,15 +1,17 @@
 import { Link, Stack } from 'expo-router'
 import { StyleSheet, Text, View } from 'react-native'
 
-import GoogleSignInButton from '@/components/social-auth-buttons/google/GoogleSignInButton';
+import GoogleSignInButton from '@/components/social-auth-buttons/google/GoogleSignInButton'
+import DiscordSignInButton from '@/components/social-auth-buttons/discord/DiscordSignInButton'
 
 export default function LoginScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Login' }} />
       <View style={styles.container}>
-        <Text type="title">Login</Text>
+        <Text type="title">Welcome to Roomie</Text>
         <GoogleSignInButton />
+        <DiscordSignInButton />
       </View>
     </>
   )
