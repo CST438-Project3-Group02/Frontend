@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { useEffect } from 'react'
 import { Button } from 'react-native'
+import DiscordButtonBase from './DiscordButtonBase'
 
 export default function DiscordSignInButton() {
   async function onSignInButtonPress() {
@@ -9,6 +10,6 @@ export default function DiscordSignInButton() {
     })
   }
 
-  return <Button title="Sign in with Discord" onPress={onSignInButtonPress} />
+  return <DiscordButtonBase onPress={onSignInButtonPress} />
 }
 

@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'
-import { Button } from 'react-native'
+import DiscordButtonBase from './DiscordButtonBase'
 
 export default function DiscordSignInButton() {
   async function onSignInButtonPress() {
@@ -39,5 +39,5 @@ export default function DiscordSignInButton() {
     }
   }
 
-  return <Button title="Sign in with Discord" onPress={onSignInButtonPress} />
+  return <DiscordButtonBase onPress={onSignInButtonPress} />
 }

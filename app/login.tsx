@@ -9,7 +9,7 @@ export default function LoginScreen() {
     <>
       <Stack.Screen options={{ title: 'Login' }} />
       <View style={styles.container}>
-        <Text type="title">Welcome to Roomie</Text>
+        <Text type="title">Welcome to Roomie!</Text>
         <GoogleSignInButton />
         <DiscordSignInButton />
       </View>
@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    gap: 5
   },
   link: {
     marginTop: 15,
