@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 import { SplashScreenController } from '@/components/SplashScreenController'
 import { useAuthContext } from '@/hooks/use-auth-context'
-// import { useColorScheme } from 'react-native'
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from 'react-native'
+// import { useColorScheme } from '@/hooks/use-color-scheme';
 import AuthProvider from '@/providers/auth-provider'
 
 // Separate RootNavigator so we can access the AuthContext
@@ -27,6 +27,7 @@ function RootNavigator() {
     </Stack>
   )
 }
+
 export default function RootLayout() {
   const colorScheme = useColorScheme()
   return (

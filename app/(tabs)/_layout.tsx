@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router'
-import BottomNav, { NavItem } from '@/components/ui/BottomNav';
-import Header from '@/components/ui/Header';
+import BottomNavigation from '@/components/layout/BottomNavigation'
+import Topbar from '@/components/layout/Topbar'
+import Sidebar from '@/components/layout/Sidebar'
 import { Slot, usePathname, useRouter } from 'expo-router';
 import { View } from 'react-native';
 
@@ -22,13 +23,13 @@ export default function TabLayout() {
 
   return (
     <>
-      <Header userAvatar="https://csumb.instructure.com/images/thumbnails/102974/cBVS9eVxGuykL7at5GD2Rx7no3D1htNYXZP5i5j9" />
+      {/* <Topbar /> */}
 
       <View style={{ flex: 1, paddingTop: 88, paddingBottom: 100 }}>
         <Slot />
       </View>
 
-      <BottomNav activeItem={activeItem} onSelect={handleSelect} />
+      {/* <BottomNavigation items={['Activity', 'Chores', 'Expenses', 'Groceries']}/> */}
     </>
   );
 }
