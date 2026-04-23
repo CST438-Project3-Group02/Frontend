@@ -2,6 +2,7 @@ import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
+import SignOutButton from "@/components/social-auth-buttons/SignOutButton"
 
 interface MenuItem {
   id: string;
@@ -84,6 +85,7 @@ export default function Sidebar({
           </TouchableOpacity>
         ))}
       </View>
+      <SignOutButton />
     </View>
   );
 }
