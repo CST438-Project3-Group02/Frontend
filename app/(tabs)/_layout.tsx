@@ -19,19 +19,9 @@ export default function TabLayout() {
     if (item === 'Expenses') router.push('/expenses');
     if (item === 'Groceries') router.push('/groceries');
   };
-}
 
-export default function TabsLayout() {
   return (
-    // <Tabs screenOptions={{ headerShown: false }}>
-    //   <Tabs.Screen
-    //     name="index"
-    //     options={{
-    //       title: 'Home',
-    //     }}
-    //   />
-    // </Tabs>
-    <View style={{ flex: 1 }}>
+    <>
       <Header userAvatar="https://csumb.instructure.com/images/thumbnails/102974/cBVS9eVxGuykL7at5GD2Rx7no3D1htNYXZP5i5j9" />
 
       <View style={{ flex: 1, paddingTop: 88, paddingBottom: 100 }}>
@@ -39,6 +29,6 @@ export default function TabsLayout() {
       </View>
 
       <BottomNav activeItem={activeItem} onSelect={handleSelect} />
-    </View>
+    </>
   );
 }
