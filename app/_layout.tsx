@@ -11,12 +11,13 @@ import AuthProvider from '@/providers/auth-provider'
 function RootNavigator() {
   const { isLoggedIn } = useAuthContext()
 
-  console.log('RootNavigator isLoggedIn:', isLoggedIn, typeof isLoggedIn)
+  console.log("logged in:", isLoggedIn)
 
+  // protects certain screens from accessed if user is not logged
   return (
     <Stack>
       <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(tabs)/index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!isLoggedIn}>
         <Stack.Screen name="login" options={{ headerShown: false }} />

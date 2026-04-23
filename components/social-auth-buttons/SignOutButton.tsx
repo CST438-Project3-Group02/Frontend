@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import React from 'react'
+import { router } from 'expo-router'
 import { Button } from 'react-native'
 
 async function onSignOutButtonPress() {
@@ -7,7 +8,9 @@ async function onSignOutButtonPress() {
 
   if (error) {
     console.error('Error signing out:', error)
+    return
   }
+
 }
 
 export default function SignOutButton() {

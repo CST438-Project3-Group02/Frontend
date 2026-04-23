@@ -1,13 +1,16 @@
 import { Image } from 'expo-image'
+import { Redirect } from 'expo-router'
 import { StyleSheet, Text, View } from 'react-native'
 
 import SignOutButton from '@/components/social-auth-buttons/SignOutButton'
 import { useAuthContext } from '@/hooks/use-auth-context'
 
 export default function HomeScreen() {
-  const { profile } = useAuthContext()
+  const { profile, isLoggedIn } = useAuthContext()
 
-  console.log("profile: ", profile)
+  if (!isLoggedIn) {
+    return <Redirect href="/login" />
+  }
 
   return (
     <View>
