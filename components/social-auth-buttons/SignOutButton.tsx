@@ -6,6 +6,8 @@ import { Button } from 'react-native'
 async function onSignOutButtonPress() {
   const { error } = await supabase.auth.signOut()
 
+  console.log("SIGN OUT")
+
   if (error) {
     console.error('Error signing out:', error)
     return
