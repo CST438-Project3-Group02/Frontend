@@ -1,3 +1,4 @@
+import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -33,8 +34,8 @@ export default function Sidebar({
       style={{
         width: 256,
         borderRightWidth: 1,
-        borderRightColor: "#D8C0B7",
-        backgroundColor: "#EEDBD5",
+        borderRightColor: colors.borderSoft,
+        backgroundColor: colors.surface,
         paddingVertical: 16,
       }}
     >
@@ -45,7 +46,7 @@ export default function Sidebar({
             fontWeight: "bold",
             paddingHorizontal: 16,
             paddingVertical: 16,
-            color: "#4A342E",
+            color: colors.text,
           }}
         >
           Roomie
@@ -69,13 +70,13 @@ export default function Sidebar({
             <Ionicons
               name={item.icon as any}
               size={20}
-              color={item.active ? "#F3E1DC" : "#A86651"}
+              color={item.active ? colors.background : colors.primary}
             />
             <ThemedText
               style={{
                 fontSize: 14,
                 fontWeight: item.active ? "600" : "400",
-                color: item.active ? "#F8F3F1" : "#4A342E",
+                color: item.active ? colors.whiteSoft : colors.text,
               }}
             >
               {item.label}

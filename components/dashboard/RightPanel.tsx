@@ -1,3 +1,4 @@
+import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -33,7 +34,7 @@ const MOCK_STATS: HouseholdStat[] = [
     label: "Chores Done",
     value: "24/30",
     icon: "checkmark-circle",
-    color: "#A86651",
+    color: colors.primary,
     progress: 80,
   },
   {
@@ -41,7 +42,7 @@ const MOCK_STATS: HouseholdStat[] = [
     label: "Total Spent",
     value: "$1,240",
     icon: "wallet",
-    color: "#B6433C",
+    color: colors.danger,
   },
 ];
 
@@ -64,7 +65,7 @@ function StatCard({
       style={{
         marginBottom: 12,
         borderRadius: 8,
-        backgroundColor: "#F6E7E2",
+        backgroundColor: colors.surfaceSoft,
         padding: 16,
       }}
     >
@@ -79,7 +80,7 @@ function StatCard({
           <ThemedText
             style={{
               fontSize: 12,
-              color: "#8D746B",
+              color: colors.textMuted,
               marginBottom: 4,
             }}
           >
@@ -89,7 +90,7 @@ function StatCard({
             style={{
               fontSize: 20,
               fontWeight: "bold",
-              color: "#4A342E",
+              color: colors.text,
             }}
           >
             {stat.value}
@@ -99,7 +100,7 @@ function StatCard({
           <Ionicons
             name={stat.icon as any}
             size={32}
-            color={stat.color || "#A86651"}
+            color={stat.color || colors.primary}
           />
         )}
       </View>
@@ -110,7 +111,7 @@ function StatCard({
             height: 8,
             width: "100%",
             borderRadius: 4,
-            backgroundColor: "#D8C0B7",
+            backgroundColor: colors.borderSoft,
             overflow: "hidden",
           }}
         >
@@ -118,7 +119,7 @@ function StatCard({
             style={{
               height: "100%",
               width: `${stat.progress}%`,
-              backgroundColor: "#A86651",
+              backgroundColor: colors.primary,
               borderRadius: 4,
             }}
           />
@@ -136,9 +137,9 @@ function TaskItem({
   onPress?: () => void;
 }) {
   const priorityColor = {
-    high: "#B6433C",
-    medium: "#E8C66A",
-    low: "#7A8A4A",
+    high: colors.danger,
+    medium: colors.warning,
+    low: colors.success,
   }[task.priority || "medium"];
 
   return (
@@ -150,7 +151,7 @@ function TaskItem({
         alignItems: "flex-start",
         gap: 12,
         borderRadius: 8,
-        backgroundColor: "#F6E7E2",
+        backgroundColor: colors.surfaceSoft,
         padding: 12,
       }}
     >
@@ -168,7 +169,7 @@ function TaskItem({
           style={{
             fontSize: 14,
             fontWeight: "500",
-            color: "#4A342E",
+            color: colors.text,
           }}
         >
           {task.title}
@@ -177,7 +178,7 @@ function TaskItem({
           <ThemedText
             style={{
               fontSize: 12,
-              color: "#8D746B",
+              color: colors.textMuted,
             }}
           >
             {task.dueDate}
@@ -185,7 +186,7 @@ function TaskItem({
         )}
       </View>
       <TouchableOpacity>
-        <Ionicons name="chevron-forward" size={16} color="#A86651" />
+        <Ionicons name="chevron-forward" size={16} color={colors.primary} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -203,8 +204,8 @@ export default function RightPanel({
       style={{
         width: 256,
         borderLeftWidth: 1,
-        borderLeftColor: "#D8C0B7",
-        backgroundColor: "#EEDBD5",
+        borderLeftColor: colors.borderSoft,
+        backgroundColor: colors.surface,
         padding: 16,
       }}
     >
@@ -213,7 +214,7 @@ export default function RightPanel({
           marginBottom: 16,
           fontSize: 18,
           fontWeight: "bold",
-          color: "#4A342E",
+          color: colors.text,
         }}
       >
         Household Stats
@@ -241,7 +242,7 @@ export default function RightPanel({
           <ThemedText
             style={{
               fontWeight: "600",
-              color: "#4A342E",
+              color: colors.text,
             }}
           >
             Pending Tasks
@@ -250,7 +251,7 @@ export default function RightPanel({
             <ThemedText
               style={{
                 fontSize: 12,
-                color: "#A86651",
+                color: colors.primary,
               }}
             >
               View All

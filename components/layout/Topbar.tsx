@@ -1,5 +1,7 @@
+import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { TextInput, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "../themed-text";
 
 interface TopbarProps {
@@ -8,6 +10,8 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <View
       style={{
@@ -16,10 +20,11 @@ export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
         justifyContent: "space-between",
         gap: 16,
         borderBottomWidth: 1,
-        borderBottomColor: "#D8C0B7",
-        backgroundColor: "#EEDBD5",
+        borderBottomColor: colors.borderSoft,
+        backgroundColor: colors.surface,
         paddingHorizontal: 16,
         paddingVertical: 12,
+        paddingTop: insets.top + 12,
       }}
     >
       <View style={{ flex: 1 }}>
@@ -29,16 +34,16 @@ export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
           onChangeText={onSearch}
           style={{
             borderRadius: 8,
-            backgroundColor: "#F6E7E2",
+            backgroundColor: colors.surfaceSoft,
             paddingHorizontal: 16,
             paddingVertical: 8,
-            color: "#4A342E",
+            color: colors.text,
             minHeight: 40,
           }}
         />
       </View>
       <TouchableOpacity>
-        <Ionicons name="notifications" size={24} color="#A86651" />
+        <Ionicons name="notifications" size={24} color={colors.primary} />
       </TouchableOpacity>
       <TouchableOpacity
         style={{
@@ -52,14 +57,14 @@ export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
             height: 32,
             width: 32,
             borderRadius: 16,
-            backgroundColor: "#A86651",
+            backgroundColor: colors.primary,
           }}
         />
         <ThemedText
           style={{
             fontSize: 14,
             fontWeight: "600",
-            color: "#4A342E",
+            color: colors.text,
           }}
         >
           {userName}

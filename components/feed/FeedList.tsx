@@ -1,3 +1,4 @@
+import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -25,30 +26,17 @@ interface FeedListProps {
 const MOCK_POSTS: FeedPost[] = [
   {
     id: "1",
-    author: "Sarah Jenkins",
-    content:
-      "Just finished the deep clean of the living room 🎉 It's so much lighter in here now! Who's up for pizza tonight to celebrate?",
-    image: "https://via.placeholder.com/400x300?text=Living+Room",
-    timestamp: "1h ago",
-    likes: 12,
-    comments: 3,
-    shares: 1,
-    tags: ["Chores", "Clean"],
-  },
-  {
-    id: "2",
-    author: "Marcus Thorne",
-    content: "Added Household Bill",
+    author: "Dr. Clinkenbeard",
+    content: "give me an A",
     timestamp: "3h ago",
     likes: 5,
     comments: 1,
     tags: ["Expenses"],
   },
   {
-    id: "3",
-    author: "Elena Rodriguez",
-    content:
-      "Just added these to the groceries list. We were out of the good coffee! ☕",
+    id: "2",
+    author: "Kristopher Church",
+    content: "Is Lebron the goat",
     timestamp: "5h ago",
     likes: 8,
     comments: 2,
@@ -69,8 +57,8 @@ function FeedPostCard({
         marginBottom: 16,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#D8C0B7",
-        backgroundColor: "#EEDBD5",
+        borderColor: colors.borderSoft,
+        backgroundColor: colors.surface,
         padding: 16,
       }}
     >
@@ -96,14 +84,14 @@ function FeedPostCard({
               height: 40,
               width: 40,
               borderRadius: 20,
-              backgroundColor: "#A86651",
+              backgroundColor: colors.primary,
             }}
           />
           <View style={{ flex: 1 }}>
             <ThemedText
               style={{
                 fontWeight: "600",
-                color: "#4A342E",
+                color: colors.text,
               }}
             >
               {post.author}
@@ -111,7 +99,7 @@ function FeedPostCard({
             <ThemedText
               style={{
                 fontSize: 12,
-                color: "#8D746B",
+                color: colors.textMuted,
               }}
             >
               {post.timestamp}
@@ -119,7 +107,7 @@ function FeedPostCard({
           </View>
         </View>
         <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={20} color="#A86651" />
+          <Ionicons name="ellipsis-vertical" size={20} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -127,7 +115,7 @@ function FeedPostCard({
       <ThemedText
         style={{
           marginBottom: 12,
-          color: "#4A342E",
+          color: colors.text,
         }}
       >
         {post.content}
@@ -142,7 +130,7 @@ function FeedPostCard({
             height: 192,
             width: "100%",
             borderRadius: 8,
-            backgroundColor: "#F6E7E2",
+            backgroundColor: colors.surfaceSoft,
           }}
         />
       )}
@@ -162,7 +150,7 @@ function FeedPostCard({
               key={tag}
               style={{
                 borderRadius: 16,
-                backgroundColor: "#F6E7E2",
+                backgroundColor: colors.surfaceSoft,
                 paddingHorizontal: 12,
                 paddingVertical: 4,
               }}
@@ -171,7 +159,7 @@ function FeedPostCard({
                 style={{
                   fontSize: 12,
                   fontWeight: "500",
-                  color: "#4A342E",
+                  color: colors.text,
                 }}
               >
                 {tag}
@@ -188,7 +176,7 @@ function FeedPostCard({
           alignItems: "center",
           justifyContent: "space-between",
           borderTopWidth: 1,
-          borderTopColor: "#D8C0B7",
+          borderTopColor: colors.borderSoft,
           paddingTop: 12,
         }}
       >
@@ -196,12 +184,12 @@ function FeedPostCard({
           onPress={() => onLike?.(post.id)}
           style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
         >
-          <Ionicons name="heart-outline" size={18} color="#A86651" />
+          <Ionicons name="heart-outline" size={18} color={colors.primary} />
           {post.likes !== undefined && (
             <ThemedText
               style={{
                 fontSize: 14,
-                color: "#8D746B",
+                color: colors.textMuted,
               }}
             >
               {post.likes}
@@ -211,33 +199,42 @@ function FeedPostCard({
         <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
         >
-          <Ionicons name="chatbubble-outline" size={18} color="#A86651" />
+          <Ionicons
+            name="chatbubble-outline"
+            size={18}
+            color={colors.primary}
+          />
           {post.comments !== undefined && (
             <ThemedText
               style={{
                 fontSize: 14,
-                color: "#8D746B",
+                color: colors.textMuted,
               }}
             >
               {post.comments}
             </ThemedText>
           )}
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* Share button commented out for now - not needed in first version */}
+        {/* <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
         >
-          <Ionicons name="share-social-outline" size={18} color="#A86651" />
+          <Ionicons
+            name="share-social-outline"
+            size={18}
+            color={colors.primary}
+          />
           {post.shares !== undefined && (
             <ThemedText
               style={{
                 fontSize: 14,
-                color: "#8D746B",
+                color: colors.textMuted,
               }}
             >
               {post.shares}
             </ThemedText>
           )}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
