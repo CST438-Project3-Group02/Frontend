@@ -1,3 +1,4 @@
+import { colors } from '@/constants/colors'
 import { AntDesign } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
@@ -5,8 +6,8 @@ export default function GoogleButtonBase({ onPress }: { onPress: () => void }) {
   return (
     <Pressable style={styles.button} onPress={onPress}>
       <View style={styles.content}>
-        <AntDesign name="google" size={20}/>
-        <Text style={styles.text}>Continue with Google</Text>
+        <AntDesign name="google" size={20} color="white"/>
+        <Text style={styles.text}>Sign in with Google</Text>
       </View>
     </Pressable>
   )
@@ -14,9 +15,9 @@ export default function GoogleButtonBase({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.secondary,
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   text: {
-    color: 'black',
+    color: 'white',
     fontSize: 14,
     fontWeight: '400',
   },
