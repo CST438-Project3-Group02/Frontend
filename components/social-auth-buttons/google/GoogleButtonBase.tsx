@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons'
+import { AntDesign } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
-export default function DiscordButtonBase({ onPress }: { onPress: () => void }) {
+export default function GoogleButtonBase({ onPress }: { onPress: () => void }) {
   return (
     <Pressable style={styles.button} onPress={onPress}>
       <View style={styles.content}>
-        <Ionicons name="logo-discord" size={20} color="white" />
-        <Text style={styles.text}>Continue with Discord</Text>
+        <AntDesign name="google" size={20}/>
+        <Text style={styles.text}>Continue with Google</Text>
       </View>
     </Pressable>
   )
@@ -14,7 +14,7 @@ export default function DiscordButtonBase({ onPress }: { onPress: () => void }) 
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#5865F2',
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   text: {
-    color: 'white',
+    color: 'black',
     fontSize: 14,
     fontWeight: '400',
   },
