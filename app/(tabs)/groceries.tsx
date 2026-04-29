@@ -1,11 +1,27 @@
-import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import { ThemedText } from "@/components/themed-text";
+import RightPanel from "@/components/dashboard/RightPanel";
+import ItemCard from "@/components/groceries/ItemCard";
+import SearchBar from "@/components/groceries/SearchBar";
 import { colors } from "@/constants/colors";
 import { useRouter } from "expo-router";
-import { View, useWindowDimensions } from "react-native";
+import React from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
+
+const groceries = [
+  { id: 1, name: "Milk", count: 2, addedBy: "Maya", isUrgent: true, isChecked: false },
+  { id: 2, name: "Bread", count: 1, addedBy: "Alex", isUrgent: false, isChecked: false },
+  { id: 3, name: "Eggs", count: 12, addedBy: "Jordan", isUrgent: false, isChecked: true },
+  { id: 4, name: "Cheese", count: 1, addedBy: "Chris", isUrgent: false, isChecked: false },
+  { id: 5, name: "Fruits", count: 5, addedBy: "Taylor", isUrgent: true, isChecked: false },
+];
 
 export default function GroceriesPage() {
   const router = useRouter();
@@ -20,17 +36,21 @@ export default function GroceriesPage() {
       groceries: "/groceries",
       settings: "/settings",
     };
+
     if (routes[id]) {
       router.push(routes[id] as any);
     }
   };
+
   return (
     <View
-      style={{
-        flex: 1,
-        flexDirection: isMobile ? "column" : "row",
-        backgroundColor: colors.background,
-      }}
+      style={[
+        styles.page,
+        {
+          flexDirection: isMobile ? "column" : "row",
+          backgroundColor: colors.background,
+        },
+      ]}
     >
       {!isMobile && (
         <Sidebar
@@ -46,42 +66,49 @@ export default function GroceriesPage() {
         />
       )}
 
-      <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar userName="User" />
-        <View
-          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
+      <View style={styles.mainColumn}>
+        <Topbar />
+
+        <ScrollView
+          contentContainerStyle={[
+            styles.contentContainer,
+            isMobile && styles.mobileContentContainer,
+          ]}
+          showsVerticalScrollIndicator={false}
         >
-          <ThemedText
-            style={{
-              fontSize: 28,
-              fontWeight: "bold",
-              color: colors.text,
-              marginBottom: 16,
-            }}
-          >
-            Groceries
-          </ThemedText>
-          <ThemedText
-            style={{
-              fontSize: 16,
-              color: colors.textMuted,
-            }}
-          >
-            Develop groceries page here...
-          </ThemedText>
-        </View>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Groceries</Text>
+            <Text style={styles.subtitle}>
+              Keep track of what the house needs
+            </Text>
+          </View>
+
+          <SearchBar onAdd={(text) => console.log("Add item:", text)} />
+
+          <View style={styles.list}>
+            {groceries.map((item) => (
+              <View key={item.id} style={styles.cardWrapper}>
+                <ItemCard
+                  name={item.name}
+                  count={item.count}
+                  addedBy={item.addedBy}
+                  avatarUrl={`https://i.pravatar.cc/150?u=${item.id}`}
+                  isUrgent={item.isUrgent}
+                  isChecked={item.isChecked}
+                  onToggle={() => console.log("Toggle item:", item.id)}
+                />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+
         {isMobile && (
           <BottomNavigation
             items={[
               { id: "activity", label: "Activity", icon: "list" },
               { id: "chores", label: "Chores", icon: "checkbox" },
               { id: "expenses", label: "Expenses", icon: "receipt" },
-              {
-                id: "groceries",
-                label: "Groceries",
-                icon: "cart",
-                active: true,
-              },
+              { id: "groceries", label: "Groceries", icon: "cart", active: true },
             ]}
             onItemPress={handleNavigation}
           />
@@ -92,3 +119,39 @@ export default function GroceriesPage() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+  },
+  mainColumn: {
+    flex: 1,
+    flexDirection: "column",
+  },
+  contentContainer: {
+    padding: 24,
+    paddingBottom: 32,
+  },
+  mobileContentContainer: {
+    paddingBottom: 100,
+  },
+  headerRow: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#18181b",
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#71717a",
+  },
+  list: {
+    marginTop: 18,
+  },
+  cardWrapper: {
+    marginBottom: 12,
+  },
+});
