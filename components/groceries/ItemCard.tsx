@@ -1,13 +1,14 @@
+import { Check } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
+  Animated,
   Image,
   Pressable,
   StyleSheet,
-  Animated,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import { Check } from 'lucide-react-native';
 
 interface ItemCardProps {
   name: string;
@@ -17,16 +18,22 @@ interface ItemCardProps {
   isUrgent?: boolean;
   isChecked?: boolean;
   onToggle?: () => void;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
+  onCountChange?: (value: string) => void;
 }
 
 export default function ItemCard({
   name,
-  count,
+  count = 1,
   addedBy,
   avatarUrl,
-  isUrgent,
-  isChecked,
+  isUrgent = false,
+  isChecked = false,
   onToggle,
+  onIncrement,
+  onDecrement,
+  onCountChange,
 }: ItemCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(10)).current;
@@ -44,7 +51,7 @@ export default function ItemCard({
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, translateY]);
 
   return (
     <Animated.View
@@ -80,7 +87,7 @@ export default function ItemCard({
         </Text>
 
         <View style={styles.metaRow}>
-          {isUrgent && (
+          {isUrgent && !isChecked && (
             <Text style={styles.urgentText}>
               Urgent •{' '}
             </Text>
@@ -91,14 +98,39 @@ export default function ItemCard({
         </View>
       </View>
 
-      {/* Avatar */}
-      <View style={styles.avatarWrapper}>
-        <Image
-          source={{ uri: avatarUrl }}
-          style={styles.avatar}
-        />
-      </View>
-    </Animated.View>
+      {isChecked && (
+        <View style={styles.quantityRow}>
+          <TextInput
+            value={String(count)}
+            onChangeText={onCountChange}
+            keyboardType="number-pad"
+            style={styles.quantityInput}
+            placeholder="1"
+            placeholderTextColor="#a1a1aa"
+            textAlign="center"
+          />
+
+          <View style={styles.stepperColumn}>
+            <Pressable onPress={onIncrement} style={styles.stepperButton}>
+              <Text style={styles.stepperText}>+</Text>
+            </Pressable>
+
+            <Pressable onPress={onDecrement} style={styles.stepperButton}>
+              <Text style={styles.stepperText}>−</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    
+
+      {/* Avatar */ }
+  <View style={styles.avatarWrapper}>
+    <Image
+      source={{ uri: avatarUrl }}
+      style={styles.avatar}
+    />
+  </View>
+    </Animated.View >
   );
 }
 
@@ -154,10 +186,10 @@ const styles = StyleSheet.create({
     color: '#27272a',
   },
 
-  titleChecked: {
-    textDecorationLine: 'line-through',
-    color: '#71717a',
-  },
+ titleChecked: {
+  color: '#a1a1aa',
+  opacity: 0.6,
+},
 
   metaRow: {
     flexDirection: 'row',
@@ -178,6 +210,47 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     color: '#a1a1aa',
+  },
+
+  quantityRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  quantityInput: {
+    width: 52,
+    height: 38,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#fed7aa",
+    backgroundColor: "#fff7ed",
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#27272a",
+    marginRight: 8,
+    paddingHorizontal: 8,
+  },
+
+  stepperColumn: {
+    justifyContent: "space-between",
+    height: 38,
+  },
+
+  stepperButton: {
+    width: 28,
+    height: 17,
+    borderRadius: 8,
+    backgroundColor: "#ffedd5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  stepperText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#ea580c",
+    lineHeight: 14,
   },
 
   avatarWrapper: {

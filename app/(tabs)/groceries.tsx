@@ -6,7 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -74,7 +74,7 @@ export default function GroceriesPage() {
   const isMobile = width < 768;
 
   const [groceries, setGroceries] = useState<GroceryItem[]>(initialGroceries);
-  const hasSelectedItems = groceries.some((item) => item.isChecked);
+
 
   const handleNavigation = (id: string) => {
     const routes: Record<string, string> = {
@@ -100,9 +100,54 @@ export default function GroceriesPage() {
     );
   };
 
+  const handleIncrement = (itemId: number) => {
+    setGroceries((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? { ...item, count: item.count + 1 }
+          : item
+      )
+    );
+  };
+
+  const handleDecrement = (itemId: number) => {
+    setGroceries((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? { ...item, count: Math.max(1, item.count - 1) }
+          : item
+      )
+    );
+  };
+
+  const handleCountChange = (itemId: number, value: string) => {
+    const parsed = parseInt(value, 10);
+
+    setGroceries((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+            ...item,
+            count:
+              Number.isNaN(parsed) || parsed < 1
+                ? 1
+                : parsed,
+          }
+          : item
+      )
+    );
+  };
+
   const handleDeleteSelected = () => {
-  setGroceries((prev) => prev.filter((item) => !item.isChecked));
-};
+    setGroceries((prev) => prev.filter((item) => !item.isChecked));
+  };
+
+  const selectedCount = useMemo(
+    () => groceries.filter((item) => item.isChecked).length,
+    [groceries]
+  );
+
+  const hasSelectedItems = selectedCount > 0;
 
   return (
     <View
@@ -145,18 +190,18 @@ export default function GroceriesPage() {
             </Text>
           </View>
 
-{hasSelectedItems && (
-  <View style={styles.bulkActionContainer}>
-    <Pressable
-      style={styles.deleteButton}
-      onPress={handleDeleteSelected}
-    >
-      <Text style={styles.deleteButtonText}>
-        Remove Selected ({groceries.filter(i => i.isChecked).length})
-      </Text>
-    </Pressable>
-  </View>
-)}
+          {hasSelectedItems && (
+            <View style={styles.bulkActionContainer}>
+              <Pressable
+                style={styles.deleteButton}
+                onPress={handleDeleteSelected}
+              >
+                <Text style={styles.deleteButtonText}>
+                  Remove Selected ({groceries.filter(i => i.isChecked).length})
+                </Text>
+              </Pressable>
+            </View>
+          )}
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
 
           <View style={styles.list}>
@@ -170,6 +215,9 @@ export default function GroceriesPage() {
                   isUrgent={item.isUrgent}
                   isChecked={item.isChecked}
                   onToggle={() => handleToggleItem(item.id)}
+                  onIncrement={() => handleIncrement(item.id)}
+                  onDecrement={() => handleDecrement(item.id)}
+                  onCountChange={(value) => handleCountChange(item.id, value)}
                 />
               </View>
             ))}
@@ -229,20 +277,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bulkActionContainer: {
-  marginBottom: 12,
-},
+    marginBottom: 12,
+  },
 
-deleteButton: {
-  backgroundColor: "#FDE7DF",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  borderRadius: 999,
-  alignSelf: "flex-start",
-},
+  deleteButton: {
+    backgroundColor: "#FDE7DF",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    alignSelf: "flex-start",
+  },
 
-deleteButtonText: {
-  color: "#C16D4F",
-  fontWeight: "700",
-  fontSize: 14,
-},
+  deleteButtonText: {
+    color: "#C16D4F",
+    fontWeight: "700",
+    fontSize: 14,
+  },
 });
