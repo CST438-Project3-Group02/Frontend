@@ -1,32 +1,80 @@
-import BottomNavigation from "@/components/layout/BottomNavigation";
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import RightPanel from "@/components/dashboard/RightPanel";
 import ItemCard from "@/components/groceries/ItemCard";
 import SearchBar from "@/components/groceries/SearchBar";
+import BottomNavigation from "@/components/layout/BottomNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+  Pressable,
   ScrollView,
-  Text,
-  View,
   StyleSheet,
+  Text,
   useWindowDimensions,
+  View,
 } from "react-native";
 
-const groceries = [
-  { id: 1, name: "Milk", count: 2, addedBy: "Maya", isUrgent: true, isChecked: false },
-  { id: 2, name: "Bread", count: 1, addedBy: "Alex", isUrgent: false, isChecked: false },
-  { id: 3, name: "Eggs", count: 12, addedBy: "Jordan", isUrgent: false, isChecked: true },
-  { id: 4, name: "Cheese", count: 1, addedBy: "Chris", isUrgent: false, isChecked: false },
-  { id: 5, name: "Fruits", count: 5, addedBy: "Taylor", isUrgent: true, isChecked: false },
+type GroceryItem = {
+  id: number;
+  name: string;
+  count: number;
+  addedBy: string;
+  isUrgent: boolean;
+  isChecked: boolean;
+};
+
+const initialGroceries: GroceryItem[] = [
+  {
+    id: 1,
+    name: "Milk",
+    count: 2,
+    addedBy: "Maya",
+    isUrgent: true,
+    isChecked: false,
+  },
+  {
+    id: 2,
+    name: "Bread",
+    count: 1,
+    addedBy: "Alex",
+    isUrgent: false,
+    isChecked: false,
+  },
+  {
+    id: 3,
+    name: "Eggs",
+    count: 12,
+    addedBy: "Jordan",
+    isUrgent: false,
+    isChecked: true,
+  },
+  {
+    id: 4,
+    name: "Cheese",
+    count: 1,
+    addedBy: "Chris",
+    isUrgent: false,
+    isChecked: false,
+  },
+  {
+    id: 5,
+    name: "Fruits",
+    count: 5,
+    addedBy: "Taylor",
+    isUrgent: true,
+    isChecked: false,
+  },
 ];
 
 export default function GroceriesPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
+
+  const [groceries, setGroceries] = useState<GroceryItem[]>(initialGroceries);
+  const hasSelectedItems = groceries.some((item) => item.isChecked);
 
   const handleNavigation = (id: string) => {
     const routes: Record<string, string> = {
@@ -41,6 +89,20 @@ export default function GroceriesPage() {
       router.push(routes[id] as any);
     }
   };
+
+  const handleToggleItem = (itemId: number) => {
+    setGroceries((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? { ...item, isChecked: !item.isChecked }
+          : item
+      )
+    );
+  };
+
+  const handleDeleteSelected = () => {
+  setGroceries((prev) => prev.filter((item) => !item.isChecked));
+};
 
   return (
     <View
@@ -83,6 +145,18 @@ export default function GroceriesPage() {
             </Text>
           </View>
 
+{hasSelectedItems && (
+  <View style={styles.bulkActionContainer}>
+    <Pressable
+      style={styles.deleteButton}
+      onPress={handleDeleteSelected}
+    >
+      <Text style={styles.deleteButtonText}>
+        Remove Selected ({groceries.filter(i => i.isChecked).length})
+      </Text>
+    </Pressable>
+  </View>
+)}
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
 
           <View style={styles.list}>
@@ -95,7 +169,7 @@ export default function GroceriesPage() {
                   avatarUrl={`https://i.pravatar.cc/150?u=${item.id}`}
                   isUrgent={item.isUrgent}
                   isChecked={item.isChecked}
-                  onToggle={() => console.log("Toggle item:", item.id)}
+                  onToggle={() => handleToggleItem(item.id)}
                 />
               </View>
             ))}
@@ -154,4 +228,21 @@ const styles = StyleSheet.create({
   cardWrapper: {
     marginBottom: 12,
   },
+  bulkActionContainer: {
+  marginBottom: 12,
+},
+
+deleteButton: {
+  backgroundColor: "#FDE7DF",
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  borderRadius: 999,
+  alignSelf: "flex-start",
+},
+
+deleteButtonText: {
+  color: "#C16D4F",
+  fontWeight: "700",
+  fontSize: 14,
+},
 });
