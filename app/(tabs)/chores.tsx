@@ -18,6 +18,7 @@ export default function ChoresPage() {
       chores: "/chores",
       expenses: "/expenses",
       groceries: "/groceries",
+      chat: "/chat",
       settings: "/settings",
     };
     if (routes[id]) {
@@ -39,6 +40,7 @@ export default function ChoresPage() {
             { id: "chores", label: "Chores", icon: "checkbox", active: true },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
+            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           onItemPress={handleNavigation}
@@ -47,7 +49,7 @@ export default function ChoresPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar userName="User" />
+        <Topbar />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
         >
