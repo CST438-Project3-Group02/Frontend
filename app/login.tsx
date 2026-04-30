@@ -5,11 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   ImageBackground,
-  SafeAreaView,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   return (
