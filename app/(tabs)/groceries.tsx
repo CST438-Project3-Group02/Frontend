@@ -178,9 +178,7 @@ export default function GroceriesPage() {
       <View style={{ flex: 1, flexDirection: "column" }}>
         <Topbar />
         <View
-          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
-      <View style={styles.mainColumn}>
-        <Topbar />
+          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}></View>
 
         <ScrollView
           contentContainerStyle={[
