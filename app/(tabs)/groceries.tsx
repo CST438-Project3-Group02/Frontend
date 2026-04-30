@@ -18,6 +18,7 @@ export default function GroceriesPage() {
       chores: "/chores",
       expenses: "/expenses",
       groceries: "/groceries",
+      chat: "/chat",
       settings: "/settings",
     };
     if (routes[id]) {
@@ -39,6 +40,7 @@ export default function GroceriesPage() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart", active: true },
+            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           onItemPress={handleNavigation}

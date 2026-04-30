@@ -46,6 +46,7 @@ export default function SettingsPage() {
       chores: "/chores",
       expenses: "/expenses",
       groceries: "/groceries",
+      chat: "/chat",
       settings: "/settings",
     };
     if (routes[id]) {
@@ -188,6 +189,7 @@ export default function SettingsPage() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
+            { id: "chat", label: "Chat", icon: "chatbubble" },
             {
               id: "settings",
               label: "Settings",
@@ -506,6 +508,7 @@ export default function SettingsPage() {
               { id: "chores", label: "Chores", icon: "checkbox" },
               { id: "expenses", label: "Expenses", icon: "receipt" },
               { id: "groceries", label: "Groceries", icon: "cart" },
+              { id: "chat", label: "Chat", icon: "chatbubble" },
             ]}
             onItemPress={handleNavigation}
           />

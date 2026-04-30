@@ -1,11 +1,11 @@
+import RightPanel from "@/components/dashboard/RightPanel";
+import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useRouter } from "expo-router";
 import { View, useWindowDimensions } from "react-native";
-import RightPanel from "@/components/dashboard/RightPanel";
-import FeedList from "@/components/feed/FeedList";
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 
 export default function Index() {
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function Index() {
       chores: "/chores",
       expenses: "/expenses",
       groceries: "/groceries",
+      chat: "/chat",
       settings: "/settings",
     };
     if (routes[id]) {
@@ -39,6 +40,7 @@ export default function Index() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
+            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           onItemPress={handleNavigation}
@@ -53,6 +55,7 @@ export default function Index() {
           <BottomNavigation
             items={[
               { id: "activity", label: "Activity", icon: "list", active: true },
+              { id: "chat", label: "Chat", icon: "chatbubble" },
               { id: "chores", label: "Chores", icon: "checkbox" },
               { id: "expenses", label: "Expenses", icon: "receipt" },
               { id: "groceries", label: "Groceries", icon: "cart" },
