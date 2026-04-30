@@ -183,25 +183,30 @@ export default function GroceriesPage() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>Groceries</Text>
-            <Text style={styles.subtitle}>
-              Keep track of what the house needs
-            </Text>
+          <View style={styles.headerBlock}>
+            <View style={styles.headerTopRow}>
+              <View style={styles.headerTextContainer}>
+                <Text style={styles.title}>Groceries</Text>
+                <Text style={styles.subtitle}>
+                  Keep track of what the house needs
+                </Text>
+              </View>
+
+              <View style={styles.deleteButtonSlot}>
+                {hasSelectedItems ? (
+                  <Pressable
+                    style={styles.deleteButton}
+                    onPress={handleDeleteSelected}
+                  >
+                    <Text style={styles.deleteButtonText}>
+                      Remove Selected ({selectedCount})
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
           </View>
 
-          {hasSelectedItems && (
-            <View style={styles.bulkActionContainer}>
-              <Pressable
-                style={styles.deleteButton}
-                onPress={handleDeleteSelected}
-              >
-                <Text style={styles.deleteButtonText}>
-                  Remove Selected ({groceries.filter(i => i.isChecked).length})
-                </Text>
-              </Pressable>
-            </View>
-          )}
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
 
           <View style={styles.list}>
@@ -257,27 +262,39 @@ const styles = StyleSheet.create({
   mobileContentContainer: {
     paddingBottom: 100,
   },
-  headerRow: {
+
+  headerBlock: {
     marginBottom: 20,
   },
+
+  headerTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+
+  headerTextContainer: {
+    flex: 1,
+  },
+
   title: {
     fontSize: 28,
     fontWeight: "800",
     color: "#18181b",
     marginBottom: 6,
   },
+
   subtitle: {
     fontSize: 14,
     color: "#71717a",
   },
-  list: {
-    marginTop: 18,
-  },
-  cardWrapper: {
-    marginBottom: 12,
-  },
-  bulkActionContainer: {
-    marginBottom: 12,
+
+  deleteButtonSlot: {
+    minHeight: 44,
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+    minWidth: 190,
   },
 
   deleteButton: {
@@ -285,12 +302,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 999,
-    alignSelf: "flex-start",
   },
 
   deleteButtonText: {
     color: "#C16D4F",
     fontWeight: "700",
     fontSize: 14,
+  },
+
+  list: {
+    marginTop: 18,
+  },
+
+  cardWrapper: {
+    marginBottom: 12,
   },
 });
