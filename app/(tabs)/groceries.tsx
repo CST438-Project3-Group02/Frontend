@@ -183,6 +183,7 @@ export default function GroceriesPage() {
           ]}
           showsVerticalScrollIndicator={false}
         >
+          // Header with title, subtitle, and delete button
           <View style={styles.headerBlock}>
             <View style={styles.headerTopRow}>
               <View style={styles.headerTextContainer}>
@@ -209,6 +210,7 @@ export default function GroceriesPage() {
 
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
 
+          // List of grocery items
           <View style={styles.list}>
             {groceries.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>
