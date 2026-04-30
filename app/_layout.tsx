@@ -6,6 +6,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useColorScheme } from 'react-native'
 import 'react-native-reanimated'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 // Separate RootNavigator so we can access the AuthContext
 function RootNavigator() {
@@ -34,12 +35,14 @@ function RootNavigator() {
 export default function RootLayout() {
   const colorScheme = useColorScheme()
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <AuthProvider>
-        <SplashScreenController />
-        <RootNavigator />
-        <StatusBar style="auto" />
-      </AuthProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={DefaultTheme}>
+        <AuthProvider>
+          <SplashScreenController />
+          <RootNavigator />
+          <StatusBar style="auto" />
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }
