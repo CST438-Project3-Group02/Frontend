@@ -1,15 +1,22 @@
+import type { Session, User } from '@supabase/supabase-js'
 import { createContext, useContext } from 'react'
 
-export type AuthData = {
-  claims?: Record<string, any> | null
-  profile?: any | null
-  isLoading: boolean
+type AuthData = {
   isLoggedIn: boolean
+  isLoading: boolean
+  isProfileLoading: boolean
+  profile: any | null
+  session: Session | null
+  user: User | null
 }
+
 export const AuthContext = createContext<AuthData>({
-  claims: undefined,
-  profile: undefined,
-  isLoading: true,
   isLoggedIn: false,
+  isLoading: true,
+  isProfileLoading: true,
+  profile: null,
+  session: null,
+  user: null,
 })
+
 export const useAuthContext = () => useContext(AuthContext)
