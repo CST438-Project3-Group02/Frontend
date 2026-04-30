@@ -52,7 +52,7 @@ export default function ExpensesPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar userName="User" />
+        <Topbar />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
         >
