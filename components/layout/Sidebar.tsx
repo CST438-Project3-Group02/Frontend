@@ -1,8 +1,8 @@
+import SignOutButton from "@/components/social-auth-buttons/SignOutButton";
 import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
-import SignOutButton from "@/components/social-auth-buttons/SignOutButton"
 
 interface MenuItem {
   id: string;
@@ -53,7 +53,7 @@ export default function Sidebar({
           Roomie
         </ThemedText>
       </TouchableOpacity>
-      <View style={{ gap: 8, paddingHorizontal: 8 }}>
+      <View style={{ flex: 1, gap: 8, paddingHorizontal: 8 }}>
         {items.map((item) => (
           <TouchableOpacity
             key={item.id}
