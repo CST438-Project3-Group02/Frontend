@@ -83,6 +83,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       value={{
         isLoggedIn: !!session,
         isLoading: isAuthLoading,
+        isProfileLoading,
         profile,
         session,
         user: session?.user ?? null,

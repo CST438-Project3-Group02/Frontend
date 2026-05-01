@@ -1,4 +1,4 @@
-const BASE_URL = 'temp';
+const BASE_URL = 'http://localhost:8080';
 
 // TODO: JWT with bearer token eventually
 export async function request(endpoint : string, options : RequestInit = {}) {
