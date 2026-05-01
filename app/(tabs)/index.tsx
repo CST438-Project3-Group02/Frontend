@@ -1,3 +1,4 @@
+import Greeting from "@/components/dashboard/Greeting";
 import RightPanel from "@/components/dashboard/RightPanel";
 import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -50,6 +51,7 @@ export default function Index() {
 
       <View style={{ flex: 1, flexDirection: "column" }}>
         <Topbar />
+        <Greeting />
         <FeedList />
         {isMobile && (
           <BottomNavigation
