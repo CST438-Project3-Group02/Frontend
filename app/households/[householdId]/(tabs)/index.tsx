@@ -1,11 +1,11 @@
+import RightPanel from "@/components/dashboard/RightPanel";
+import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useRouter } from "expo-router";
 import { View, useWindowDimensions } from "react-native";
-import RightPanel from "@/components/dashboard/RightPanel";
-import FeedList from "@/components/feed/FeedList";
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 
 export default function Index() {
   const router = useRouter();
