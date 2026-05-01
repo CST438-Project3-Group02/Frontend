@@ -15,7 +15,7 @@ export default function GoogleButtonBase({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 12,
