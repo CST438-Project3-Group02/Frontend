@@ -1,11 +1,11 @@
 export type Household = {
-  id: string;
-  name: string;
-  rentCost: number;
-  numOfBedrooms?: number;
+  householdId: number;
+  householdName: string;
+  rentCost: number | null;
+  numOfBedrooms: number | null;
   address: string;
   city: string;
   state: string;
-  zipCode?: string;
-  country?: string;
+  zipCode: string;
+  country: string;
 };

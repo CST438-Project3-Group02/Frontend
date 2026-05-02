@@ -15,20 +15,24 @@ export default function HouseholdCard({
   household: Household;
   onPress?: (id: string) => void;
 }) {
-  const address = household.city + ', ' + household.state
+
+  let city = household.city ? household.city : 'City';
+  let state = household.state ? household.state : 'State';
+
+  const address = city + ', ' + state
 
   return (
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.9}
-      onPress={() => onPress?.(household.id)}
+      onPress={() => onPress?.(household.householdId.toString())}
     >
       <View style={styles.cardContent}>
         <View style={styles.cardHeaderRow}>
           <View style={{ flex: 1 }}>
             <FontAwesome6 name="house-chimney" size={16} color="black" />
             <Text style={styles.cardTitle} numberOfLines={1}>
-              {household.name}
+              {household.householdName}
             </Text>
           </View>
         </View>

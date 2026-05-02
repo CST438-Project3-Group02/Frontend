@@ -23,20 +23,23 @@ export default function Index() {
   const [ households, setHouseholds ] = useState<Household[]>([])
 
   useEffect(() => {
-    if (!profile?.id) return;
+    console.log(profile)
 
+    if (!profile?.profileId) return;
     // get households for user
     const fetchHouseholds = async () => {
       try {
-        const data = await getHouseholdsByProfileId(profile.id);
-        setHouseholds(data);
+        console.log('data 1')
+        const data = await getHouseholdsByProfileId(profile.profileId);
+        console.log('data 2')
+        setHouseholds(data || []);
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchHouseholds();
-  }, [profile?.id])
+  }, [profile])
 
   const onCreate = async () => {
     router.push(`/households/create`);

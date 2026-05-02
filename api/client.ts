@@ -3,6 +3,7 @@ const BASE_URL = 'http://localhost:8080';
 // TODO: JWT with bearer token eventually
 export async function request(endpoint : string, options : RequestInit = {}) {
   // make a call to api
+
   const config = {
     ...options,
     headers: {
@@ -12,7 +13,6 @@ export async function request(endpoint : string, options : RequestInit = {}) {
   };
 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
-
 
   let data;
 

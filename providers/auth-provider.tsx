@@ -56,7 +56,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
       try {
         const data = await getUserByOauthID(oauthId);
-
+        
         if (!mounted) return;
         setProfile(data);
       } catch (error) {
