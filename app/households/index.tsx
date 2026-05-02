@@ -23,15 +23,11 @@ export default function Index() {
   const [ households, setHouseholds ] = useState<Household[]>([])
 
   useEffect(() => {
-    console.log(profile)
-
     if (!profile?.profileId) return;
     // get households for user
     const fetchHouseholds = async () => {
       try {
-        console.log('data 1')
         const data = await getHouseholdsByProfileId(profile.profileId);
-        console.log('data 2')
         setHouseholds(data || []);
       } catch (err) {
         console.error(err);
