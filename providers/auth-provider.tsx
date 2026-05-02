@@ -1,82 +1,80 @@
-import { AuthContext } from '@/hooks/use-auth-context'
-import { supabase } from '@/lib/supabase'
-import type { Session } from '@supabase/supabase-js'
-import { PropsWithChildren, useEffect, useState } from 'react'
+import { getUserByOauthID } from '@/api/profiles';
+import { AuthContext } from '@/hooks/use-auth-context';
+import { supabase } from '@/lib/supabase';
+import type { Session } from '@supabase/supabase-js';
+import { PropsWithChildren, useEffect, useState } from 'react';
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<any>(null)
-  const [isAuthLoading, setIsAuthLoading] = useState(true)
-  const [isProfileLoading, setIsProfileLoading] = useState(false)
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     const initialize = async () => {
-      setIsAuthLoading(true)
+      setIsAuthLoading(true);
 
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await supabase.auth.getSession();
 
-      if (!mounted) return
-      setSession(session)
-      setIsAuthLoading(false)
-    }
+      if (!mounted) return;
+      setSession(session);
+      setIsAuthLoading(false);
+    };
 
-    initialize()
+    initialize();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return
-      setSession(session)
-      setIsAuthLoading(false)
-    })
+      if (!mounted) return;
+      setSession(session);
+      setIsAuthLoading(false);
+    });
 
     return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     const fetchProfile = async () => {
-      const userId = session?.user?.id
+      const oauthId = session?.user?.id;
 
-      if (!userId) {
-        setProfile(null)
-        return
+      if (!oauthId) {
+        setProfile(null);
+        return;
       }
 
-      setIsProfileLoading(true)
+      setIsProfileLoading(true);
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
+      try {
+        const data = await getUserByOauthID(oauthId);
 
-      if (!mounted) return
-
-      if (error) {
-        console.error('Error fetching profile:', error)
-        setProfile(null)
-      } else {
-        setProfile(data)
+        if (!mounted) return;
+        setProfile(data);
+      } catch (error) {
+        if (!mounted) return;
+        console.error('Error fetching profile:', error);
+        setProfile(null);
+      } finally {
+        if (!mounted) return;
+        setIsProfileLoading(false);
       }
+    };
 
-      setIsProfileLoading(false)
-    }
-
-    fetchProfile()
+    fetchProfile();
 
     return () => {
-      mounted = false
-    }
-  }, [session?.user?.id])
+      mounted = false;
+    };
+  }, [session?.user?.id]);
 
   return (
     <AuthContext.Provider
@@ -91,5 +89,5 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
