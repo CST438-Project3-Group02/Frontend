@@ -1,14 +1,15 @@
-import type { Session, User } from '@supabase/supabase-js'
-import { createContext, useContext } from 'react'
+import type { Session, User } from "@supabase/supabase-js";
+import { createContext, useContext } from "react";
 
 type AuthData = {
-  isLoggedIn: boolean
-  isLoading: boolean
-  isProfileLoading: boolean
-  profile: any | null
-  session: Session | null
-  user: User | null
-}
+  isLoggedIn: boolean;
+  isLoading: boolean;
+  isProfileLoading: boolean;
+  profile: any | null;
+  session: Session | null;
+  user: User | null;
+  refetchProfile?: () => Promise<void>;
+};
 
 export const AuthContext = createContext<AuthData>({
   isLoggedIn: false,
@@ -17,6 +18,6 @@ export const AuthContext = createContext<AuthData>({
   profile: null,
   session: null,
   user: null,
-})
+});
 
-export const useAuthContext = () => useContext(AuthContext)
+export const useAuthContext = () => useContext(AuthContext);

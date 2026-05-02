@@ -1,6 +1,8 @@
 import { colors } from "@/constants/colors";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { Ionicons } from "@expo/vector-icons";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Image, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "../themed-text";
 
@@ -9,8 +11,22 @@ interface TopbarProps {
   userName?: string;
 }
 
-export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
+export default function Topbar({ onSearch, userName }: TopbarProps) {
   const insets = useSafeAreaInsets();
+  const { profile, user } = useAuthContext();
+  const router = useRouter();
+
+  const displayName =
+    userName ||
+    profile?.name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "User";
+  const avatarUrl = profile?.profile_pic_url;
+
+  const handleProfilePress = () => {
+    router.push("/settings");
+  };
 
   return (
     <View
@@ -46,20 +62,39 @@ export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
         <Ionicons name="notifications" size={24} color={colors.primary} />
       </TouchableOpacity>
       <TouchableOpacity
+        onPress={handleProfilePress}
         style={{
           flexDirection: "row",
           alignItems: "center",
           gap: 8,
         }}
       >
-        <View
-          style={{
-            height: 32,
-            width: 32,
-            borderRadius: 16,
-            backgroundColor: colors.primary,
-          }}
-        />
+        {avatarUrl ? (
+          <Image
+            source={{ uri: avatarUrl }}
+            style={{
+              height: 32,
+              width: 32,
+              borderRadius: 16,
+              backgroundColor: colors.primary,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              height: 32,
+              width: 32,
+              borderRadius: 16,
+              backgroundColor: colors.primary,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ThemedText style={{ fontSize: 12, fontWeight: "bold" }}>
+              {displayName.charAt(0).toUpperCase()}
+            </ThemedText>
+          </View>
+        )}
         <ThemedText
           style={{
             fontSize: 14,
@@ -67,7 +102,7 @@ export default function Topbar({ onSearch, userName = "User" }: TopbarProps) {
             color: colors.text,
           }}
         >
-          {userName}
+          {displayName}
         </ThemedText>
       </TouchableOpacity>
     </View>

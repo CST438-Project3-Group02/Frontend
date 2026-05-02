@@ -82,6 +82,7 @@ export default function GroceriesPage() {
       chores: "/chores",
       expenses: "/expenses",
       groceries: "/groceries",
+      chat: "/chat",
       settings: "/settings",
     };
 
@@ -166,6 +167,7 @@ export default function GroceriesPage() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart", active: true },
+            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           onItemPress={handleNavigation}
@@ -173,8 +175,10 @@ export default function GroceriesPage() {
         />
       )}
 
-      <View style={styles.mainColumn}>
+      <View style={{ flex: 1, flexDirection: "column" }}>
         <Topbar />
+        <View
+          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}></View>
 
         <ScrollView
           contentContainerStyle={[
