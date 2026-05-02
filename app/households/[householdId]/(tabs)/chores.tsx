@@ -4,7 +4,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, useWindowDimensions } from "react-native";
 
 export default function ChoresPage() {
@@ -12,19 +12,8 @@ export default function ChoresPage() {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
 
-  const handleNavigation = (id: string) => {
-    const routes: Record<string, string> = {
-      activity: "/",
-      chores: "/chores",
-      expenses: "/expenses",
-      groceries: "/groceries",
-      chat: "/chat",
-      settings: "/settings",
-    };
-    if (routes[id]) {
-      router.push(routes[id] as any);
-    }
-  };
+  const { householdId } = useLocalSearchParams<{ householdId: string }>();
+
   return (
     <View
       style={{
@@ -43,7 +32,7 @@ export default function ChoresPage() {
             { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
-          onItemPress={handleNavigation}
+          householdId={householdId}
           onRoomiePress={() => router.push("/")}
         />
       )}
@@ -80,7 +69,7 @@ export default function ChoresPage() {
               { id: "expenses", label: "Expenses", icon: "receipt" },
               { id: "groceries", label: "Groceries", icon: "cart" },
             ]}
-            onItemPress={handleNavigation}
+            householdId={householdId}
           />
         )}
       </View>

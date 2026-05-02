@@ -1,6 +1,6 @@
-import SignOutButton from "@/components/social-auth-buttons/SignOutButton";
 import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from 'expo-router';
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
@@ -13,7 +13,7 @@ interface MenuItem {
 
 interface SidebarProps {
   items?: MenuItem[];
-  onItemPress?: (id: string) => void;
+  householdId: string;
   onRoomiePress?: () => void;
 }
 
@@ -27,9 +27,28 @@ const DEFAULT_ITEMS: MenuItem[] = [
 
 export default function Sidebar({
   items = DEFAULT_ITEMS,
-  onItemPress,
   onRoomiePress,
+  householdId
 }: SidebarProps) {
+  const router = useRouter()
+
+  const handleNavigation = (id: string) => {
+    console.log(householdId)
+    const routes = {
+      activity: { pathname: '/households/[householdId]', params: { householdId } },
+      chores: { pathname: '/households/[householdId]/chores', params: { householdId } },
+      expenses: { pathname: '/households/[householdId]/expenses', params: { householdId } },
+      groceries: { pathname: '/households/[householdId]/groceries', params: { householdId } },
+      chat: { pathname: '/households/[householdId]/chat', params: { householdId } },
+      settings: { pathname: '/households/[householdId]/settings', params: { householdId } },
+    } as const;
+
+    const route = routes[id as keyof typeof routes];
+    if (route) {
+      router.push(route);
+    }
+  };
+
   return (
     <View
       style={{
@@ -57,7 +76,7 @@ export default function Sidebar({
         {items.map((item) => (
           <TouchableOpacity
             key={item.id}
-            onPress={() => onItemPress?.(item.id)}
+            onPress={() => handleNavigation(item.id)}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -85,7 +104,6 @@ export default function Sidebar({
           </TouchableOpacity>
         ))}
       </View>
-      <SignOutButton />
     </View>
   );
 }
