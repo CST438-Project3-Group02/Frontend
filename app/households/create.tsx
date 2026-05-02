@@ -1,17 +1,22 @@
+import { createHousehold } from '@/api/households';
 import { colors } from '@/constants/colors';
+import { useAuthContext } from '@/hooks/use-auth-context';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CreateHouseholdScreen() {
+  const { profile } = useAuthContext();
+
   const [householdName, setHouseholdName] = useState('');
   const [rent, setRent] = useState('');
   const [numOfBedrooms, setNumOfBedrooms] = useState('');
@@ -20,10 +25,49 @@ export default function CreateHouseholdScreen() {
   const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [country, setCountry] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onCancel = () => {
-    router.push('/households')
-  }
+    router.push('/households');
+  };
+
+  const onPressCreate = () => {
+    if (!householdName.trim()) {
+      setError('Household name is required');
+      return;
+    }
+    setError(null);
+    setShowConfirmModal(true);
+  };
+
+  const onConfirmCreate = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        householdName,
+        rentCost: rent ? parseFloat(rent) : null,
+        numOfBedrooms: numOfBedrooms ? parseInt(numOfBedrooms) : null,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+      };
+
+      await createHousehold(profile.profileId, payload);
+
+      setShowConfirmModal(false);
+      router.push('/households');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -47,11 +91,22 @@ export default function CreateHouseholdScreen() {
               <Text style={styles.inputLabel}>HOUSEHOLD NAME</Text>
               <TextInput
                 value={householdName}
-                onChangeText={setHouseholdName}
+                onChangeText={(text) => {
+                  setHouseholdName(text);
+                  if (error) setError(null);
+                }}
                 placeholder="My New Household"
                 placeholderTextColor={colors.textMuted}
-                style={styles.input}
+                style={[
+                  styles.input,
+                  error && styles.inputError
+                ]}
               />
+              {error && (
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
+              )}
             </View>
 
             <View style={styles.row}>
@@ -59,9 +114,7 @@ export default function CreateHouseholdScreen() {
                 <Text style={styles.inputLabel}>RENT (OPTIONAL)</Text>
                 <TextInput
                   value={rent}
-                  onChangeText={(text) =>
-                    setRent(text.replace(/[^0-9.]/g, ''))
-                  }
+                  onChangeText={(text) => setRent(text.replace(/[^0-9.]/g, ''))}
                   placeholder="2500.00"
                   placeholderTextColor={colors.textMuted}
                   style={styles.input}
@@ -146,7 +199,11 @@ export default function CreateHouseholdScreen() {
           </View>
 
           <View style={styles.footerActions}>
-            <TouchableOpacity style={styles.primaryButton} activeOpacity={0.9}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              activeOpacity={0.9}
+              onPress={onPressCreate}
+            >
               <Text style={styles.primaryButtonText}>Create Household</Text>
             </TouchableOpacity>
 
@@ -160,6 +217,48 @@ export default function CreateHouseholdScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showConfirmModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowConfirmModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Create household?</Text>
+
+            <Text style={styles.modalText}>
+              {householdName
+                ? `Are you sure you want to create "${householdName}"?`
+                : 'Are you sure you want to create this household?'}
+            </Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalSecondaryButton}
+                onPress={() => setShowConfirmModal(false)}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.modalSecondaryButtonText}>Go Back</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.modalPrimaryButton,
+                  isSubmitting && styles.modalPrimaryButtonDisabled,
+                ]}
+                onPress={onConfirmCreate}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.modalPrimaryButtonText}>
+                  {isSubmitting ? 'Creating...' : 'Confirm'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -261,6 +360,70 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: colors.textMuted,
     fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(30, 18, 15, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  modalText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.textMuted,
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalSecondaryButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  modalSecondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  modalPrimaryButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+  },
+  modalPrimaryButtonDisabled: {
+    opacity: 0.7,
+  },
+  modalPrimaryButtonText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+    inputError: {
+    borderColor: colors.danger,
+  },
+  errorText: {
+    color: colors.danger,
+    fontSize: 12,
     fontWeight: '600',
   },
 });

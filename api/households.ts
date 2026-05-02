@@ -6,9 +6,10 @@ export function getHouseholdsByProfileId(profileId : number) {
 }
 
 // Creating a household
-export function createHousehold(profileId : number) {
+export function createHousehold(profileId : number, payload : any) {
   return request(`/api/households?profileId=${profileId}`, {
-      method: 'POST'
+      method: 'POST',
+      body: JSON.stringify(payload)
   });
 }
 

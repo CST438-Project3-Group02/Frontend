@@ -6,6 +6,7 @@ export async function request(endpoint : string, options : RequestInit = {}) {
   const config = {
     ...options,
     headers: {
+      'Content-Type': 'application/json',
       ...(options.headers || {}),
     }
   };
