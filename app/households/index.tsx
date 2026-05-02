@@ -1,8 +1,13 @@
+import {
+  getHouseholdsByProfileId
+} from '@/api/households';
 import CreateHouseholdCard from '@/components/households/CreateHouseholdCard';
 import HouseholdCard from '@/components/households/HouseholdCard';
+import { useAuthContext } from '@/hooks/use-auth-context';
 import { Household } from '@/types/household';
 import { Feather } from '@expo/vector-icons';
-import React from 'react';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -13,44 +18,33 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const households: Household[] = [
-  {
-    id: '1',
-    name: 'My Household',
-    rentCost: 1500,
-    address: '1234 Street St.',
-    city: 'Marina',
-    state: 'CA',
-    zipCode: '12345',
-    country: 'USA'
-  },
-  {
-    id: '2',
-    name: 'Beach Villa',
-    rentCost: 1500,
-    address: '1234 Street Ave',
-    city: 'San Francisco',
-    state: 'CA'
-  },
-  {
-    id: '3',
-    name: 'Shake Shack',
-    rentCost: 1500,
-    address: '1234 Street St.',
-    city: 'City',
-    state: 'CA'
-  }
-];
-
 export default function Index() {
-  const handleCreate = () => {
+  const { profile } = useAuthContext()
+  const [ households, setHouseholds ] = useState<Household[]>([])
 
-    console.log('Create household');
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    // get households for user
+    const fetchHouseholds = async () => {
+      try {
+        const data = await getHouseholdsByProfileId(profile.id);
+        setHouseholds(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchHouseholds();
+  }, [profile?.id])
+
+  const onCreate = async () => {
+    router.push(`/households/create`);
   };
 
   const handleOpenHousehold = (id: string) => {
     console.log('Open household:', id);
-    // router.push(`/households/${id}`);
+    router.push(`/households/${id}`);
   };
 
   return (
@@ -79,7 +73,7 @@ export default function Index() {
         </View>
 
         <View style={styles.grid}>
-          <CreateHouseholdCard onPress={handleCreate} />
+          <CreateHouseholdCard onPress={onCreate} />
 
           {households.map((household) => (
             <HouseholdCard
