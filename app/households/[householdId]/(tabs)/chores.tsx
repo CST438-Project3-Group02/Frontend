@@ -4,27 +4,16 @@ import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, useWindowDimensions } from "react-native";
 
-export default function ExpensesPage() {
+export default function ChoresPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
 
-  const handleNavigation = (id: string) => {
-    const routes: Record<string, string> = {
-      activity: "/",
-      chores: "/chores",
-      expenses: "/expenses",
-      groceries: "/groceries",
-      chat: "/chat",
-      settings: "/settings",
-    };
-    if (routes[id]) {
-      router.push(routes[id] as any);
-    }
-  };
+  const { householdId } = useLocalSearchParams<{ householdId: string }>();
+
   return (
     <View
       style={{
@@ -37,18 +26,13 @@ export default function ExpensesPage() {
         <Sidebar
           items={[
             { id: "activity", label: "Activity", icon: "list" },
-            { id: "chores", label: "Chores", icon: "checkbox" },
-            {
-              id: "expenses",
-              label: "Expenses",
-              icon: "receipt",
-              active: true,
-            },
+            { id: "chores", label: "Chores", icon: "checkbox", active: true },
+            { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
-          onItemPress={handleNavigation}
+          householdId={householdId}
           onRoomiePress={() => router.push("/")}
         />
       )}
@@ -66,7 +50,7 @@ export default function ExpensesPage() {
               marginBottom: 16,
             }}
           >
-            Expenses
+            Chores
           </ThemedText>
           <ThemedText
             style={{
@@ -74,23 +58,18 @@ export default function ExpensesPage() {
               color: colors.textMuted,
             }}
           >
-            Develop expenses page here...
+            Develop chores page here...
           </ThemedText>
         </View>
         {isMobile && (
           <BottomNavigation
             items={[
               { id: "activity", label: "Activity", icon: "list" },
-              { id: "chores", label: "Chores", icon: "checkbox" },
-              {
-                id: "expenses",
-                label: "Expenses",
-                icon: "receipt",
-                active: true,
-              },
+              { id: "chores", label: "Chores", icon: "checkbox", active: true },
+              { id: "expenses", label: "Expenses", icon: "receipt" },
               { id: "groceries", label: "Groceries", icon: "cart" },
             ]}
-            onItemPress={handleNavigation}
+            householdId={householdId}
           />
         )}
       </View>
