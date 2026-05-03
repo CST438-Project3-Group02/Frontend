@@ -1,3 +1,4 @@
+import ChoreForm from "@/components/chores/ChoreForm";
 import ChoreList from "@/components/chores/ChoreList";
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -16,9 +17,11 @@ import {
   ShoppingCart,
   User,
   Utensils,
+  X,
 } from "lucide-react-native";
 import { useState } from "react";
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -40,6 +43,8 @@ export default function ChoresPage() {
   const isMobile = width < 768;
 
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
+
+  const [isChoreModalOpen, setIsChoreModalOpen] = useState(false);
 
   const [chores, setChores] = useState<Chore[]>([
     {
@@ -234,9 +239,46 @@ export default function ChoresPage() {
         </ScrollView>
 
         {/* FAB */}
-        <Pressable style={[styles.fab, { bottom: isMobile ? 92 : 32 }]}>
+        <Pressable
+          style={[styles.fab, { bottom: isMobile ? 92 : 32 }]}
+          onPress={() => setIsChoreModalOpen(true)}
+        >
           <Plus size={32} color="#fff" strokeWidth={3} />
         </Pressable>
+
+        {/* MODAL */}
+        <Modal
+          visible={isChoreModalOpen}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setIsChoreModalOpen(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View
+              style={[
+                styles.modalCard,
+                { width: isMobile ? "92%" : 520 },
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <ThemedText style={styles.modalTitle}>
+                  Create Chore
+                </ThemedText>
+
+                <Pressable
+                  style={styles.closeButton}
+                  onPress={() => setIsChoreModalOpen(false)}
+                >
+                  <X size={22} color={colors.text} />
+                </Pressable>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <ChoreForm />
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
 
         {isMobile && (
           <BottomNavigation
@@ -264,7 +306,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
   },
   eyebrow: {
     fontSize: 11,
@@ -305,7 +346,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   choreCardCompleted: {
     opacity: 0.6,
@@ -316,7 +357,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surfaceSoft,
   },
   choreIconSecondary: {
     width: 44,
@@ -349,7 +390,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
     gap: 8,
   },
   upcomingTitle: {
@@ -374,5 +415,38 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(30, 18, 15, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalCard: {
+    maxHeight: "88%",
+    borderRadius: 28,
+    backgroundColor: colors.background,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: colors.text,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surfaceSoft,
   },
 });
