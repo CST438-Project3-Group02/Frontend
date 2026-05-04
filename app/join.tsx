@@ -1,9 +1,10 @@
+import { getHousehold, getInviteDetails } from "@/api/households";
 import { colors } from "@/constants/colors";
 import { useAuthContext } from '@/hooks/use-auth-context';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -16,6 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Join() {
   const { invite_token } = useLocalSearchParams()
   const { isLoggedIn } = useAuthContext()
+  
+  const [ householdId, setHouseholdId ] = useState(null);
+  const [ householdName, setHouseholdName ] = useState('');
 
   useEffect(() => {
     if (!invite_token) {
@@ -31,23 +35,38 @@ export default function Join() {
         invite_token 
       }))
       router.replace('/login')
+      return;
     }
+
+    const getHouseholdInvite = async () => {
+      try {
+        const inviteDetails = await getInviteDetails(invite_token as any);
+        const household = await getHousehold(inviteDetails.householdId);
+        setHouseholdId(inviteDetails.householdId);
+        setHouseholdName(household.householdName);
+      } catch (error: any) {
+        if (error.status === 404) {
+          console.log('Resource not found: Invite Token')
+        } else if (error.status === 410) {
+          console.log('Invite token expired')
+        }
+        router.replace('/households')
+      }
+    }
+
+    getHouseholdInvite()
   }, [invite_token, isLoggedIn])
-
-  const getHouseholdInvite = async () => {
-
-  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.page}>
         <View style={styles.card}>
 
-          <FontAwesome6 name="house-chimney" size={32} color="black" />
+          <FontAwesome6 name="house-chimney" size={32} color={colors.primary} />
 
           <Text style={styles.title}>
             You have been invited to{" "}
-            <Text style={styles.highlight}>The Sunnyside Flat</Text>!
+            <Text style={styles.highlight}>{householdName}</Text>!
           </Text>
 
           <Text style={styles.subtitle}>

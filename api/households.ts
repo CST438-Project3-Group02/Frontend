@@ -5,6 +5,12 @@ export function getHouseholdsByProfile(profileId : number) {
   return request(`/api/profiles/${profileId}/households`);
 }
 
+// Get a household
+export function getHousehold(householdId : number) {
+  return request(`/api/households/${householdId}`);
+}
+
+
 // Creating a household
 export async function createHousehold(profileId : number, payload : any) {
   
@@ -25,8 +31,6 @@ export async function createHousehold(profileId : number, payload : any) {
 }
 
 // Inviting a user to a household
-export function inviteHousehold(household_id : number) {
-  return request(`/api/households/${household_id}/invite`, {
-    method: 'POST'
-  });
+export function getInviteDetails(inviteCode : string) {
+  return request(`/api/invite?inviteCode=${inviteCode}`);
 }
