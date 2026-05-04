@@ -1,6 +1,4 @@
-import {
-  getHouseholdsByProfileId
-} from '@/api/households';
+import { getHouseholdsByProfile } from '@/api/households';
 import CreateHouseholdCard from '@/components/households/CreateHouseholdCard';
 import HouseholdCard from '@/components/households/HouseholdCard';
 import { useAuthContext } from '@/hooks/use-auth-context';
@@ -27,8 +25,9 @@ export default function Index() {
     // get households for user
     const fetchHouseholds = async () => {
       try {
-        const data = await getHouseholdsByProfileId(profile.profileId);
-        setHouseholds(data || []);
+        const data = await getHouseholdsByProfile(profile.profileId);
+
+        setHouseholds(data.households || []);
       } catch (err) {
         console.error(err);
       }
@@ -76,7 +75,7 @@ export default function Index() {
 
           {households.map((household) => (
             <HouseholdCard
-              key={household.id}
+              key={household.householdId}
               household={household}
               onPress={handleOpenHousehold}
             />
