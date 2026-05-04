@@ -42,6 +42,8 @@ export default function Join() {
       try {
         const inviteDetails = await getInviteDetails(invite_token as any);
         const household = await getHousehold(inviteDetails.householdId);
+        
+        
         setHouseholdId(inviteDetails.householdId);
         setHouseholdName(household.householdName);
       } catch (error: any) {
