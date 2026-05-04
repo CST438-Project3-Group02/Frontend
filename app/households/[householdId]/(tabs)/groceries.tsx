@@ -153,6 +153,7 @@ export default function GroceriesPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart", active: true },
             { id: "chat", label: "Chat", icon: "chatbubble" },
+            { id: "households", label: "Households", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}

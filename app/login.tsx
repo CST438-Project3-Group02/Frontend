@@ -16,7 +16,7 @@ export default function LoginScreen() {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const styles = createStyles(isMobile);
-  
+    
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.page}>

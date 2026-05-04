@@ -30,6 +30,7 @@ export default function BottomNavigation({
       expenses: { pathname: '/households/[householdId]/expenses', params: { householdId } },
       groceries: { pathname: '/households/[householdId]/groceries', params: { householdId } },
       chat: { pathname: '/households/[householdId]/chat', params: { householdId } },
+      households: { pathname: '/households' },
       settings: { pathname: '/households/[householdId]/settings', params: { householdId } },
     } as const;
 

@@ -1,20 +1,15 @@
-import {
-  getHouseholdsByProfileId
-} from '@/api/households';
+import { getHouseholdsByProfile } from '@/api/households';
 import CreateHouseholdCard from '@/components/households/CreateHouseholdCard';
 import HouseholdCard from '@/components/households/HouseholdCard';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { Household } from '@/types/household';
-import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,8 +22,9 @@ export default function Index() {
     // get households for user
     const fetchHouseholds = async () => {
       try {
-        const data = await getHouseholdsByProfileId(profile.profileId);
-        setHouseholds(data || []);
+        const data = await getHouseholdsByProfile(profile.profileId);
+
+        setHouseholds(data.households || []);
       } catch (err) {
         console.error(err);
       }
@@ -51,17 +47,6 @@ export default function Index() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
           <Text style={styles.brand}>Roomie</Text>
-
-          <View style={styles.topBarRight}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Feather name="bell" size={20} color="#B86A33" />
-            </TouchableOpacity>
-
-            <Image
-              source={{ uri: 'https://randomuser.me/api/portraits/women/65.jpg' }}
-              style={styles.profileImage}
-            />
-          </View>
         </View>
 
         <View style={styles.heroSection}>
@@ -76,7 +61,7 @@ export default function Index() {
 
           {households.map((household) => (
             <HouseholdCard
-              key={household.id}
+              key={household.householdId}
               household={household}
               onPress={handleOpenHousehold}
             />

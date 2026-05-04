@@ -214,6 +214,7 @@ export default function ChatPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble", active: true },
+            { id: "households", label: "Households", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
