@@ -43,6 +43,17 @@ export async function joinHousehold(profileId : number, householdId : number) {
   }); 
 }
 
+// Generating an invite code
+export function generateInviteCode(profileId : number, householdId : number | string) {
+  return request(`/api/invite`, {
+    method: 'POST',
+    body: JSON.stringify({
+      profileId,
+      householdId
+    })
+  })
+}
+
 // Inviting a user to a household
 export function getInviteDetails(inviteCode : string) {
   return request(`/api/invite?inviteCode=${inviteCode}`);

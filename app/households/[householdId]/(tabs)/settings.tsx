@@ -1,4 +1,5 @@
 import RightPanel from "@/components/dashboard/RightPanel";
+import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
@@ -465,20 +466,10 @@ export default function SettingsPage() {
                   )}
                 </View>
               </View>
-
-              {/* Sign Out Section */}
-              <TouchableOpacity
-                onPress={handleSignOut}
-                style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: 12,
-                  padding: 20,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.borderSoft,
-                }}
-              >
-              <SignOutButton />
-              </TouchableOpacity>
+              <View style={{ flex: 1, gap: 16 }}>
+                <InviteHouseholdButton />
+                <SignOutButton />
+              </View>
             </View>
           )}
         </ScrollView>
