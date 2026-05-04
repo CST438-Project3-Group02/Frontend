@@ -1,5 +1,7 @@
 import { colors } from "@/constants/colors";
+import { useAuthContext } from '@/hooks/use-auth-context';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from "react";
 import {
@@ -13,12 +15,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Join() {
   const { invite_token } = useLocalSearchParams()
+  const { isLoggedIn } = useAuthContext()
 
   useEffect(() => {
-        if (!invite_token) {
-            router.replace('/households') // redirect away if no token
-        }
-    }, [invite_token])
+    if (!invite_token) {
+      router.replace('/households') // redirect away if no token
+      return;
+    }
+
+    // If not logged in, redirect to login 
+    if (!isLoggedIn) {
+      // store redirect link and invite_token in async / local storage
+      AsyncStorage.setItem('post_login_redirect', JSON.stringify({ 
+        redirect: '/join', 
+        invite_token 
+      }))
+      router.replace('/login')
+    }
+  }, [invite_token, isLoggedIn])
+
+  const getHouseholdInvite = async () => {
+
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
