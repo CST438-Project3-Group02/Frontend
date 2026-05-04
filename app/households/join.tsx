@@ -1,6 +1,7 @@
 import { colors } from "@/constants/colors";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import React from "react";
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect } from "react";
 import {
   Pressable,
   ScrollView,
@@ -11,6 +12,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Join() {
+  const { invite_token } = useLocalSearchParams()
+
+  useEffect(() => {
+        if (!invite_token) {
+            router.replace('/households') // redirect away if no token
+        }
+    }, [invite_token])
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.page}>
