@@ -24,10 +24,23 @@ export async function createHousehold(profileId : number, payload : any) {
     body: JSON.stringify({
       profileId,
       householdId,
-      privs: 1,
+      privs: 1, // admin!
       payInterval: 3 // 1 - weekly 2 - biweekly 3 - monthly (crude, i know...)
     })
   });
+}
+
+// Joining a household
+export async function joinHousehold(profileId : number, householdId : number) {
+  return request(`/api/memberships`, {
+    method: 'POST',
+    body: JSON.stringify({
+      profileId,
+      householdId,
+      privs: 3, // regular user
+      payInterval: 3
+    })
+  }); 
 }
 
 // Inviting a user to a household

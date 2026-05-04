@@ -1,4 +1,4 @@
-import { getHousehold, getInviteDetails } from "@/api/households";
+import { getHousehold, getInviteDetails, joinHousehold } from "@/api/households";
 import { colors } from "@/constants/colors";
 import { useAuthContext } from '@/hooks/use-auth-context';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Join() {
   const { invite_token } = useLocalSearchParams()
-  const { isLoggedIn } = useAuthContext()
+  const { isLoggedIn, profile } = useAuthContext()
   
   const [ householdId, setHouseholdId ] = useState(null);
   const [ householdName, setHouseholdName ] = useState('');
@@ -57,6 +57,17 @@ export default function Join() {
     getHouseholdInvite()
   }, [invite_token, isLoggedIn])
 
+  const onJoin = async () => {
+    if (!householdId) return
+
+    try {
+        await joinHousehold(profile.profileId, householdId);
+        router.replace(`/households/${householdId}`)
+    } catch (error: any) {
+        console.error('Failed to join household', error)
+    }
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.page}>
@@ -70,11 +81,14 @@ export default function Join() {
           </Text>
 
           <Text style={styles.subtitle}>
-            Click join below to continue and start sharing your space with the
-            household.
+            Click join below to continue and enter this household as a new roomie.
           </Text>
 
-          <Pressable style={styles.primaryButton}>
+          <Pressable 
+            style={[styles.primaryButton, !householdId && { opacity: 0.5 }]} 
+            onPress={onJoin}
+            disabled={!householdId}
+          >
             <Text style={styles.primaryButtonText}>Join Household</Text>
           </Pressable>
 
