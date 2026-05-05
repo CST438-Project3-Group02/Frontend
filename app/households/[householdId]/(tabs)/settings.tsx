@@ -1,5 +1,4 @@
 import RightPanel from "@/components/dashboard/RightPanel";
-import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
@@ -180,7 +179,7 @@ export default function SettingsPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "households", label: "Households", icon: "home" },
+            { id: "household", label: "My Household", icon: "home" },
             {
               id: "settings",
               label: "Settings",
@@ -466,10 +465,7 @@ export default function SettingsPage() {
                   )}
                 </View>
               </View>
-              <View style={{ flex: 1, gap: 16 }}>
-                <InviteHouseholdButton />
-                <SignOutButton />
-              </View>
+              <SignOutButton />
             </View>
           )}
         </ScrollView>

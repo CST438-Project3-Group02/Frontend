@@ -35,7 +35,7 @@ export default function ExpensesPage() {
             },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "households", label: "Households", icon: "home" },
+            { id: "household", label: "My Household", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
