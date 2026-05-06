@@ -19,7 +19,8 @@ import {
   Utensils,
   X,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getChoresByHousehold } from "@/api/chores";
 import {
   Modal,
   Pressable,
@@ -29,12 +30,26 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+// type Chore = {
+//   id: number;
+//   title: string;
+//   subtitle: string;
+//   completed: boolean;
+//   icon: React.ElementType;
+// };
 type Chore = {
-  id: number;
-  title: string;
-  subtitle: string;
-  completed: boolean;
-  icon: React.ElementType;
+  choreId: number;
+  choreName: string;
+  choreDescription?: string;
+  repeatInterval?: number;
+  isCompleted: boolean;
+  completeBy?: string;
+  createdAt?: string;
+  profileId?: number;
+  profileName?: string;
+  householdId?: number;
+  householdName?: string;
+  dueAt?: Date;
 };
 
 export default function ChoresPage() {
@@ -45,34 +60,90 @@ export default function ChoresPage() {
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
 
   const [isChoreModalOpen, setIsChoreModalOpen] = useState(false);
+  const [chores, setChores] = useState<Chore[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [chores, setChores] = useState<Chore[]>([
-    {
-      id: 1,
-      title: "Wash the dishes",
-      subtitle: "Daily • 10 mins",
-      icon: Utensils,
-      completed: false,
-    },
-    {
-      id: 2,
-      title: "Vacuum living room",
-      subtitle: "Weekly • 20 mins",
-      icon: Brush,
-      completed: false,
-    },
-  ]);
+  async function refreshChores() {
+    if (!householdId) return;
+
+    try {
+      setLoading(true);
+      const data = await getChoresByHousehold(householdId);
+      setChores(data);
+    } catch (err) {
+      console.error("Failed to load chores", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    refreshChores();
+  }, [householdId]);
+
+  useEffect(() => {
+    async function loadChores() {
+      try {
+        const data = await getChoresByHousehold(householdId);
+        setChores(data);
+      } catch (err) {
+        console.error("Failed to load chores", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadChores();
+  }, [householdId]);
+
+  // const [chores, setChores] = useState<Chore[]>([
+  //   {
+  //     id: 1,
+  //     title: "Wash the dishes",
+  //     subtitle: "Daily • 10 mins",
+  //     icon: Utensils,
+  //     completed: false,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Vacuum living room",
+  //     subtitle: "Weekly • 20 mins",
+  //     icon: Brush,
+  //     completed: false,
+  //   },
+  // ]);
 
   const toggleChore = (id: number) => {
     setChores((prev) =>
       prev.map((chore) =>
-        chore.id === id ? { ...chore, completed: !chore.completed } : chore
+        chore.choreId === id ? { ...chore, isCompleted: !chore.isCompleted } : chore
       )
     );
   };
 
-  const incompleteCount = chores.filter((c) => !c.completed).length;
+  const incompleteCount = chores.filter((c) => !c.isCompleted).length;
 
+  const upcoming = chores
+    .filter((c) => !c.isCompleted && c.completeBy)
+    .map((c) => ({
+      ...c,
+      dueAt: new Date(c.completeBy as string),
+    }))
+    .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())
+    .slice(0, 5);
+
+  function getTimeRemaining(date: Date) {
+    const diff = date.getTime() - Date.now();
+    if (diff < 0) return "Overdue";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+
+    return `${minutes}m`;
+  }
   return (
     <View
       style={{
@@ -128,55 +199,58 @@ export default function ChoresPage() {
             icon={User}
             badge={`${incompleteCount} left`}
           >
-            {chores.map((chore) => {
-              const Icon = chore.icon;
-              const CheckboxIcon = chore.completed
-                ? CheckCircle2
-                : Circle;
+             {loading ? (
+              <ThemedText style={styles.emptyText}>Loading chores...</ThemedText>
+            ) : chores.length === 0 ? (
+              <ThemedText style={styles.emptyText}>
+                No chores yet. Tap + to create one.
+              </ThemedText>
+            ) : (
+              chores.map((chore) => {
+                const CheckboxIcon = chore.isCompleted ? CheckCircle2 : Circle;
 
-              return (
-                <Pressable
-                  key={chore.id}
-                  onPress={() => toggleChore(chore.id)}
-                  style={[
-                    styles.choreCard,
-                    chore.completed && styles.choreCardCompleted,
-                  ]}
-                >
-                  <View style={styles.choreIcon}>
-                    <Icon size={22} color={colors.primary} />
-                  </View>
+                return (
+                  <Pressable
+                    key={chore.choreId}
+                    onPress={() => toggleChore(chore.choreId)}
+                    style={[
+                      styles.choreCard,
+                      chore.isCompleted && styles.choreCardCompleted,
+                    ]}
+                  >
+                    <View style={styles.choreIcon}>
+                      <User size={22} color={colors.primary} />
+                    </View>
 
-                  <View style={{ flex: 1 }}>
-                    <ThemedText
-                      style={[
-                        styles.choreTitle,
-                        chore.completed && styles.completedText,
-                      ]}
-                    >
-                      {chore.title}
-                    </ThemedText>
+                    <View style={{ flex: 1 }}>
+                      <ThemedText
+                        style={[
+                          styles.choreTitle,
+                          chore.isCompleted && styles.completedText,
+                        ]}
+                      >
+                        {chore.choreName}
+                      </ThemedText>
 
-                    <ThemedText style={styles.choreSubtitle}>
-                      {chore.subtitle}
-                    </ThemedText>
-                  </View>
+                      <ThemedText style={styles.choreSubtitle}>
+                        {chore.choreDescription || "No description"}
+                      </ThemedText>
+                    </View>
 
-                  <CheckboxIcon
-                    size={24}
-                    color={
-                      chore.completed
-                        ? colors.primary
-                        : colors.textMuted
-                    }
-                  />
-                </Pressable>
-              );
-            })}
+                    <CheckboxIcon
+                      size={24}
+                      color={
+                        chore.isCompleted ? colors.primary : colors.textMuted
+                      }
+                    />
+                  </Pressable>
+                );
+              })
+            )}
           </ChoreList>
 
           {/* Household */}
-          <ChoreList
+          {/* <ChoreList
             title="My Household"
             icon={Brush}
             badge="5 tasks"
@@ -197,7 +271,7 @@ export default function ChoresPage() {
                 </ThemedText>
               </View>
             </View>
-          </ChoreList>
+          </ChoreList> */}
 
           {/* Upcoming */}
           <View style={styles.section}>
@@ -210,7 +284,7 @@ export default function ChoresPage() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.upcomingList}
             >
-              <View style={styles.upcomingCard}>
+              {/* <View style={styles.upcomingCard}>
                 <Droplets size={24} color={colors.primary} />
                 <ThemedText style={styles.upcomingTitle}>
                   Water the plants
@@ -234,7 +308,27 @@ export default function ChoresPage() {
                 <ThemedText style={styles.timeTag}>
                   Sat, 10 AM
                 </ThemedText>
-              </View>
+              </View> */}
+              {upcoming.map((chore) => (
+                <View key={chore.choreId} style={styles.upcomingCard}>
+                  <Droplets size={24} color={colors.primary} />
+                  <ThemedText style={styles.upcomingTitle}>
+                    {chore.choreName}
+                  </ThemedText>
+                  <ThemedText style={styles.upcomingDescription}>
+                    {chore.choreDescription}
+                  </ThemedText>
+                   {chore.profileName && (
+                      <ThemedText style={styles.assignedText}>
+                        {chore.profileName}
+                      </ThemedText>
+                    )}
+
+                    <ThemedText style={styles.timeTag}>
+                      {chore.dueAt ? getTimeRemaining(chore.dueAt) : ""}
+                    </ThemedText>
+                </View>
+              ))}
             </ScrollView>
           </View>
         </ScrollView>
@@ -275,7 +369,15 @@ export default function ChoresPage() {
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false}>
-                <ChoreForm />
+                {/* <ChoreForm /> */}
+                <ChoreForm
+                  householdId={householdId}
+                  onSuccess={() => {
+                    setIsChoreModalOpen(false);
+                    refreshChores();
+                  }}
+                  onCancel={() => setIsChoreModalOpen(false)}
+                />
               </ScrollView>
             </View>
           </View>
@@ -449,5 +551,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surfaceSoft,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 14,
+  },
+  assignedText: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
   },
 });
