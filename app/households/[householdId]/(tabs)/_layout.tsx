@@ -21,6 +21,7 @@ export default function HouseholdLayout() {
                     getHousehold(householdId),
                     getMembership(profile.profileId, householdId)
                 ])
+
                 setHousehold(householdData)
                 setMembership(membershipData)
             } catch (error) {

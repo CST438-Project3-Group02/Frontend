@@ -1,4 +1,4 @@
-import { deleteHousehold, getHouseholdWithProfiles, updateHousehold } from "@/api/households";
+import { deleteHousehold, getHouseholdWithProfiles, leaveHousehold, updateHousehold } from "@/api/households";
 import RightPanel from "@/components/dashboard/RightPanel";
 import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -6,6 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { useHouseholdContext } from "@/hooks/use-household-context";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -25,11 +26,14 @@ export default function HouseholdSettings() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
+
+  const { profile } = useAuthContext();
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
   const { household, membership, setHousehold } = useHouseholdContext();
 
   const [members, setMembers] = useState<any[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false);
 
   // Editable fields
   const [householdName, setHouseholdName] = useState('');
@@ -44,6 +48,7 @@ export default function HouseholdSettings() {
   const isAdmin = (membership?.privs ?? 99) <= 2;
   const isOwner = membership?.privs === 1;
   const canEdit = isAdmin;
+  const canLeave = (membership?.privs ?? 99) >= 2;
 
   useEffect(() => {
     if (household) {
@@ -62,6 +67,7 @@ export default function HouseholdSettings() {
     const fetchMembers = async () => {
       try {
         const data = await getHouseholdWithProfiles(householdId);
+        console.log(data.profiles)
         setMembers(data.profiles ?? []);
       } catch (error) {
         console.error('Failed to fetch members', error);
@@ -107,6 +113,18 @@ export default function HouseholdSettings() {
       router.replace('/households');
     } catch (error) {
       console.error('Failed to delete household', error);
+    }
+  };
+
+  const onLeave = async () => {
+    if (!membership) return;
+
+    try {
+      await leaveHousehold(membership?.profileHouseholdId);
+      setDeleteModalVisible(false);
+      router.replace('/households');
+    } catch (error) {
+      console.error('Failed to leave household', error);
     }
   };
 
@@ -167,7 +185,6 @@ export default function HouseholdSettings() {
                     value={numOfBedrooms}
                     onChangeText={setNumOfBedrooms}
                     editable={canEdit}
-                    hasChevron
                   />
                 </View>
               </SectionCard>
@@ -193,6 +210,11 @@ export default function HouseholdSettings() {
                   <TouchableOpacity style={styles.discardButton} onPress={onDiscard}>
                     <ThemedText style={styles.discardButtonText}>Discard Edits</ThemedText>
                   </TouchableOpacity>
+                  {canLeave && (
+                    <TouchableOpacity style={styles.leaveButton} onPress={() => setLeaveModalVisible(true)}>
+                      <ThemedText style={styles.leaveButtonText}>Leave Household</ThemedText>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
 
@@ -208,9 +230,11 @@ export default function HouseholdSettings() {
               <View style={styles.membersCard}>
                 <View style={styles.membersHeader}>
                   <ThemedText style={styles.membersTitle}>Members</ThemedText>
-                  <View style={styles.memberCountPill}>
-                    <ThemedText style={styles.memberCountText}>{members.length} Total</ThemedText>
-                  </View>
+                  {isOwner &&
+                    <Pressable>
+                      <Feather name="settings" size={18} color={colors.danger} />
+                    </Pressable>
+                  }
                 </View>
 
                 {members.length === 0 ? (
@@ -222,6 +246,9 @@ export default function HouseholdSettings() {
                     {members.map((member: any) => (
                       <View key={member.profileId} style={styles.memberRow}>
                         <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                        <ThemedText style={styles.role}>
+                          { member.memberships.privs === 1 ? 'owner' : member.memberships.privs === 2 ? 'admin' : 'member' }
+                        </ThemedText>
                       </View>
                     ))}
                   </View>
@@ -272,6 +299,32 @@ export default function HouseholdSettings() {
               </Pressable>
               <Pressable style={styles.confirmDeleteButton} onPress={onDelete}>
                 <ThemedText style={styles.confirmDeleteText}>Delete</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Leave Confirmation Modal */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={leaveModalVisible}
+        onRequestClose={() => setLeaveModalVisible(false)}
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modalCard}>
+            <ThemedText style={styles.modalTitle}>Leave Household</ThemedText>
+            <ThemedText style={styles.modalSubtitle}>
+              Are you sure you want to leave{' '}
+              <ThemedText style={styles.modalBold}>{householdName}</ThemedText>?
+            </ThemedText>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelButton} onPress={() => setLeaveModalVisible(false)}>
+                <ThemedText style={styles.cancelText}>Cancel</ThemedText>
+              </Pressable>
+              <Pressable style={styles.confirmDeleteButton} onPress={onLeave}>
+                <ThemedText style={styles.confirmDeleteText}>Leave</ThemedText>
               </Pressable>
             </View>
           </View>
@@ -443,6 +496,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   memberRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSoft,
@@ -631,4 +688,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.primary,
   },
+  leaveButton: {
+    minWidth: 180,
+    height: 62,
+    borderRadius: 31,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    backgroundColor: colors.surface,
+  },
+  leaveButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  role: {
+    color: colors.text,
+    fontWeight: '500',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: colors.borderSoft 
+  }
 });

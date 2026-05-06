@@ -47,6 +47,11 @@ export async function joinHousehold(profileId : number, householdId : number | s
   }); 
 }
 
+// Leave a household
+export async function leaveHousehold(membershipId : number) {
+  return request(`/api/memberships/${membershipId}`); 
+}
+
 // update a household
 export function updateHousehold(householdId: string, data: any) {
   return request(`/api/households/${householdId}`, {
