@@ -72,7 +72,7 @@ export default function ChatPage() {
     const fetchOtherMembers = async () => {
       try {
         const { data } = await supabase
-          .from("profile")
+          .from("profiles")
           .select("*")
           .neq("id", user.id);
 

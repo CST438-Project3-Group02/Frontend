@@ -68,7 +68,7 @@ export const useChat = () => {
         .select(
           `
           *,
-          profile!sender_id(name, profile_pic_url)
+          profiles!sender_id(name, profile_pic_url)
         `,
         )
         .eq("conversation_id", conversationId)
@@ -78,7 +78,7 @@ export const useChat = () => {
 
       const messagesWithSender = data?.map((msg: any) => ({
         ...msg,
-        sender: msg.profile,
+        sender: msg.profiles,
       }));
 
       setMessages(messagesWithSender || []);
@@ -221,7 +221,7 @@ export const useChat = () => {
           // Fetch the sender info for the new message
           supabase
             .from("messages")
-            .select("*, profile!sender_id(name, profile_pic_url)")
+            .select("*, profiles!sender_id(name, profile_pic_url)")
             .eq("id", payload.new.id)
             .single()
             .then(({ data }) => {
@@ -230,7 +230,7 @@ export const useChat = () => {
                   ...prev,
                   {
                     ...data,
-                    sender: data.profile,
+                    sender: data.profiles,
                   },
                 ]);
               }

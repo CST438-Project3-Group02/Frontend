@@ -86,7 +86,7 @@ export default function SettingsPage() {
 
       // Update profile in database (create if doesn't exist)
       const { error: updateError } = await supabase
-        .from("profile")
+        .from("profiles")
         .upsert(
           { id: user.id, profile_pic_url: publicUrl },
           { onConflict: "id" },
@@ -119,7 +119,7 @@ export default function SettingsPage() {
     try {
       // Use upsert to create or update profile
       const { error } = await supabase
-        .from("profile")
+        .from("profiles")
         .upsert({ id: user.id, name: displayName }, { onConflict: "id" });
 
       if (error) {
