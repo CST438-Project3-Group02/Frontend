@@ -22,6 +22,7 @@ const DEFAULT_ITEMS: MenuItem[] = [
   { id: "chores", label: "Chores", icon: "checkbox" },
   { id: "expenses", label: "Expenses", icon: "receipt" },
   { id: "groceries", label: "Groceries", icon: "cart" },
+  { id: "household", label: "My Household", icon: "home"},
   { id: "settings", label: "Settings", icon: "settings" },
 ];
 
@@ -32,6 +33,11 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter()
 
+  const bottomItemIds = ['household', 'settings']
+
+  const topItems = items.filter(item => !bottomItemIds.includes(item.id))
+  const bottomItems = items.filter(item => bottomItemIds.includes(item.id))
+
   const handleNavigation = (id: string) => {
     console.log(householdId)
     const routes = {
@@ -40,6 +46,7 @@ export default function Sidebar({
       expenses: { pathname: '/households/[householdId]/expenses', params: { householdId } },
       groceries: { pathname: '/households/[householdId]/groceries', params: { householdId } },
       chat: { pathname: '/households/[householdId]/chat', params: { householdId } },
+      household: { pathname: '/households/[householdId]/householdsettings', params: { householdId } },
       settings: { pathname: '/households/[householdId]/settings', params: { householdId } },
     } as const;
 
@@ -72,37 +79,72 @@ export default function Sidebar({
           Roomie
         </ThemedText>
       </TouchableOpacity>
-      <View style={{ flex: 1, gap: 8, paddingHorizontal: 8 }}>
-        {items.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => handleNavigation(item.id)}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              borderRadius: 8,
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              backgroundColor: item.active ? "#A86651" : "transparent",
-            }}
-          >
-            <Ionicons
-              name={item.icon as any}
-              size={20}
-              color={item.active ? colors.background : colors.primary}
-            />
-            <ThemedText
-              style={{
-                fontSize: 14,
-                fontWeight: item.active ? "600" : "400",
-                color: item.active ? colors.whiteSoft : colors.text,
-              }}
-            >
-              {item.label}
-            </ThemedText>
-          </TouchableOpacity>
-        ))}
+      <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 8 }}>
+          <View style={{ gap: 8 }}>
+              {topItems.map((item) => (
+                  <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleNavigation(item.id)}
+                      style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 12,
+                          borderRadius: 8,
+                          paddingHorizontal: 16,
+                          paddingVertical: 12,
+                          backgroundColor: item.active ? "#A86651" : "transparent",
+                      }}
+                  >
+                      <Ionicons
+                          name={item.icon as any}
+                          size={20}
+                          color={item.active ? colors.background : colors.primary}
+                      />
+                      <ThemedText
+                          style={{
+                              fontSize: 14,
+                              fontWeight: item.active ? "600" : "400",
+                              color: item.active ? colors.whiteSoft : colors.text,
+                          }}
+                      >
+                          {item.label}
+                      </ThemedText>
+                  </TouchableOpacity>
+              ))}
+          </View>
+
+          <View style={{ gap: 8, borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 8 }}>
+              {bottomItems.map((item) => (
+                  <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleNavigation(item.id)}
+                      style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 12,
+                          borderRadius: 8,
+                          paddingHorizontal: 16,
+                          paddingVertical: 12,
+                          backgroundColor: item.active ? "#A86651" : "transparent",
+                      }}
+                  >
+                      <Ionicons
+                          name={item.icon as any}
+                          size={20}
+                          color={item.active ? colors.background : colors.primary}
+                      />
+                      <ThemedText
+                          style={{
+                              fontSize: 14,
+                              fontWeight: item.active ? "600" : "400",
+                              color: item.active ? colors.whiteSoft : colors.text,
+                          }}
+                      >
+                          {item.label}
+                      </ThemedText>
+                  </TouchableOpacity>
+              ))}
+          </View>
       </View>
     </View>
   );

@@ -1,3 +1,4 @@
+import Greeting from "@/components/dashboard/Greeting";
 import RightPanel from "@/components/dashboard/RightPanel";
 import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -29,6 +30,7 @@ export default function Index() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
+            { id: "household", label: "My Household", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
@@ -38,6 +40,7 @@ export default function Index() {
 
       <View style={{ flex: 1, flexDirection: "column" }}>
         <Topbar />
+        <Greeting />
         <FeedList />
         {isMobile && (
           <BottomNavigation

@@ -179,6 +179,7 @@ export default function SettingsPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
+            { id: "household", label: "My Household", icon: "home" },
             {
               id: "settings",
               label: "Settings",
@@ -464,20 +465,7 @@ export default function SettingsPage() {
                   )}
                 </View>
               </View>
-
-              {/* Sign Out Section */}
-              <TouchableOpacity
-                onPress={handleSignOut}
-                style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: 12,
-                  padding: 20,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.borderSoft,
-                }}
-              >
               <SignOutButton />
-              </TouchableOpacity>
             </View>
           )}
         </ScrollView>

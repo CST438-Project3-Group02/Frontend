@@ -4,8 +4,9 @@ import GoogleButtonBase from './GoogleButtonBase'
 export default function GoogleSignInButton() {
   async function onSignInButtonPress() {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    })
+      provider: 'google'
+    }
+  )
   }
 
   return <GoogleButtonBase onPress={onSignInButtonPress} />
