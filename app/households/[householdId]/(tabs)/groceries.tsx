@@ -5,7 +5,7 @@ import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   Pressable,
@@ -72,24 +72,9 @@ export default function GroceriesPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
+  const { householdId } = useLocalSearchParams<{ householdId: string }>();
 
   const [groceries, setGroceries] = useState<GroceryItem[]>(initialGroceries);
-
-
-  const handleNavigation = (id: string) => {
-    const routes: Record<string, string> = {
-      activity: "/",
-      chores: "/chores",
-      expenses: "/expenses",
-      groceries: "/groceries",
-      chat: "/chat",
-      settings: "/settings",
-    };
-
-    if (routes[id]) {
-      router.push(routes[id] as any);
-    }
-  };
 
   const handleToggleItem = (itemId: number) => {
     setGroceries((prev) =>
@@ -168,9 +153,10 @@ export default function GroceriesPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart", active: true },
             { id: "chat", label: "Chat", icon: "chatbubble" },
+            { id: "household", label: "My Household", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
-          onItemPress={handleNavigation}
+          householdId={householdId}
           onRoomiePress={() => router.push("/")}
         />
       )}
@@ -243,7 +229,7 @@ export default function GroceriesPage() {
               { id: "expenses", label: "Expenses", icon: "receipt" },
               { id: "groceries", label: "Groceries", icon: "cart", active: true },
             ]}
-            onItemPress={handleNavigation}
+            householdId={householdId}
           />
         )}
       </View>

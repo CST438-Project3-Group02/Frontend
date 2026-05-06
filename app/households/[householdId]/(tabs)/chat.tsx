@@ -8,18 +8,18 @@ import { useAuthContext } from "@/hooks/use-auth-context";
 import { useChat } from "@/hooks/use-chat";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    ScrollView,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 export type Tab = "household" | "direct";
@@ -28,6 +28,9 @@ export default function ChatPage() {
   const router = useRouter();
   const isMobile = useWindowDimensions().width < 768;
   const { user } = useAuthContext();
+
+  const { householdId } = useLocalSearchParams<{ householdId: string }>();
+  if (!householdId) return null;
 
   const {
     messages,
@@ -44,20 +47,6 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [otherProfiles, setOtherProfiles] = useState<any[]>([]);
-
-  const handleNavigation = (id: string) => {
-    const routes: Record<string, string> = {
-      activity: "/",
-      chores: "/chores",
-      expenses: "/expenses",
-      groceries: "/groceries",
-      settings: "/settings",
-      chat: "/chat",
-    };
-    if (routes[id]) {
-      router.push(routes[id] as any);
-    }
-  };
 
   // Initialize household chat on mount
   useEffect(() => {
@@ -225,10 +214,11 @@ export default function ChatPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble", active: true },
+            { id: "household", label: "My Household", icon: "home" },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
-          onItemPress={handleNavigation}
-          onRoomiePress={() => router.push("/")}
+          householdId={householdId}
+          onRoomiePress={() => router.push("/households")}
         />
       )}
 
@@ -476,7 +466,7 @@ export default function ChatPage() {
               { id: "groceries", label: "Groceries", icon: "cart" },
               { id: "chat", label: "Chat", icon: "chatbubble", active: true },
             ]}
-            onItemPress={handleNavigation}
+            householdId={householdId}
           />
         )}
       </View>
