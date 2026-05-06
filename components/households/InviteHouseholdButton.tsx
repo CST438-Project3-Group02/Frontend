@@ -15,7 +15,7 @@ import {
 import { ThemedText } from "../themed-text";
 
 // set to localhost for dev
-const inviteLink = "http://localhost:8081/join?invite_token=";
+const inviteLink = "https://roomie-28aj.vercel.app/join?invite_token=";
 
 export default function InviteHouseholdButton() {
   const [visible, setVisible] = useState(false);
