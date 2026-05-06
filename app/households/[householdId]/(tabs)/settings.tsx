@@ -2,13 +2,14 @@ import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import SignOutButton from "@/components/social-auth-buttons/SignOutButton";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -26,6 +27,8 @@ export default function SettingsPage() {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const { user, profile, isProfileLoading, refetchProfile } = useAuthContext();
+  const { householdId } = useLocalSearchParams<{ householdId: string }>();
+
 
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -39,20 +42,6 @@ export default function SettingsPage() {
       setAvatarUrl(profile.profile_pic_url || "");
     }
   }, [profile]);
-
-  const handleNavigation = (id: string) => {
-    const routes: Record<string, string> = {
-      activity: "/",
-      chores: "/chores",
-      expenses: "/expenses",
-      groceries: "/groceries",
-      chat: "/chat",
-      settings: "/settings",
-    };
-    if (routes[id]) {
-      router.push(routes[id] as any);
-    }
-  };
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -190,6 +179,7 @@ export default function SettingsPage() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
+            { id: "household", label: "My Household", icon: "home" },
             {
               id: "settings",
               label: "Settings",
@@ -197,7 +187,7 @@ export default function SettingsPage() {
               active: true,
             },
           ]}
-          onItemPress={handleNavigation}
+          householdId={householdId}
           onRoomiePress={() => router.push("/")}
         />
       )}
@@ -475,29 +465,7 @@ export default function SettingsPage() {
                   )}
                 </View>
               </View>
-
-              {/* Sign Out Section */}
-              <TouchableOpacity
-                onPress={handleSignOut}
-                style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: 12,
-                  padding: 20,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.borderSoft,
-                }}
-              >
-                <ThemedText
-                  style={{
-                    textAlign: "center",
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: "#EF4444",
-                  }}
-                >
-                  Sign Out
-                </ThemedText>
-              </TouchableOpacity>
+              <SignOutButton />
             </View>
           )}
         </ScrollView>
@@ -510,7 +478,7 @@ export default function SettingsPage() {
               { id: "groceries", label: "Groceries", icon: "cart" },
               { id: "chat", label: "Chat", icon: "chatbubble" },
             ]}
-            onItemPress={handleNavigation}
+            householdId={householdId}
           />
         )}
       </View>
