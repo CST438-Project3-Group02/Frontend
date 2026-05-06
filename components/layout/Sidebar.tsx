@@ -22,7 +22,7 @@ const DEFAULT_ITEMS: MenuItem[] = [
   { id: "chores", label: "Chores", icon: "checkbox" },
   { id: "expenses", label: "Expenses", icon: "receipt" },
   { id: "groceries", label: "Groceries", icon: "cart" },
-  { id: "households", label: "Households", icon: "home"},
+  { id: "household", label: "My Household", icon: "home"},
   { id: "settings", label: "Settings", icon: "settings" },
 ];
 
@@ -33,7 +33,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter()
 
-  const bottomItemIds = ['households', 'settings']
+  const bottomItemIds = ['household', 'settings']
 
   const topItems = items.filter(item => !bottomItemIds.includes(item.id))
   const bottomItems = items.filter(item => bottomItemIds.includes(item.id))
@@ -46,7 +46,7 @@ export default function Sidebar({
       expenses: { pathname: '/households/[householdId]/expenses', params: { householdId } },
       groceries: { pathname: '/households/[householdId]/groceries', params: { householdId } },
       chat: { pathname: '/households/[householdId]/chat', params: { householdId } },
-      households: { pathname: '/households' },
+      household: { pathname: '/households/[householdId]/householdsettings', params: { householdId } },
       settings: { pathname: '/households/[householdId]/settings', params: { householdId } },
     } as const;
 
