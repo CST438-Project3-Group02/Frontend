@@ -188,7 +188,6 @@ export default function ChoreForm({
 
       {/* Actions */}
       <View style={styles.actions}>
-        {/* CHANGE: submit button now calls handleSubmit */}
         <Pressable
           style={[
             styles.submitButton,
@@ -201,8 +200,6 @@ export default function ChoreForm({
             {submitting ? "Creating..." : "Create Chore"}
           </ThemedText>
         </Pressable>
-
-        {/* CHANGE: Go Back can now close modal */}
         <Pressable style={styles.backButton} onPress={onCancel}>
           <ThemedText style={styles.backText}>Go Back</ThemedText>
         </Pressable>
@@ -210,131 +207,6 @@ export default function ChoreForm({
     </View>
   );
 }
-
-// export default function TaskForm() {
-//   const [selectedUser, setSelectedUser] = useState("2");
-
-//   return (
-//     <View style={styles.form}>
-//       {/* Chore Name */}
-//       <View style={styles.field}>
-//         <ThemedText style={styles.label}>Chore Name</ThemedText>
-//         <TextInput
-//           placeholder="e.g., Deep Clean Living Room"
-//           placeholderTextColor={colors.textMuted}
-//           style={styles.input}
-//         />
-//       </View>
-
-//       {/* Description */}
-//       <View style={styles.field}>
-//         <ThemedText style={styles.label}>Description</ThemedText>
-//         <TextInput
-//           placeholder="Share specific details or expectations..."
-//           placeholderTextColor={colors.textMuted}
-//           style={[styles.input, styles.textArea]}
-//           multiline
-//           numberOfLines={4}
-//           textAlignVertical="top"
-//         />
-//       </View>
-
-//       {/* Date + Time */}
-//       <View style={styles.row}>
-//         <View style={[styles.field, styles.rowField]}>
-//           <ThemedText style={styles.label}>Complete By Date</ThemedText>
-//           <View style={styles.inputWrapper}>
-//             <TextInput
-//               placeholder="YYYY-MM-DD"
-//               placeholderTextColor={colors.textMuted}
-//               style={styles.inputWithIcon}
-//             />
-//             <Calendar size={20} color={colors.textMuted} />
-//           </View>
-//         </View>
-
-//         <View style={[styles.field, styles.rowField]}>
-//           <ThemedText style={styles.label}>Preferred Time</ThemedText>
-//           <View style={styles.inputWrapper}>
-//             <TextInput
-//               placeholder="HH:MM"
-//               placeholderTextColor={colors.textMuted}
-//               style={styles.inputWithIcon}
-//             />
-//             <Clock size={20} color={colors.textMuted} />
-//           </View>
-//         </View>
-//       </View>
-
-//       {/* Assign To */}
-//       <View style={styles.field}>
-//         <ThemedText style={styles.label}>Assign To</ThemedText>
-
-//         <View style={styles.userWrap}>
-//           {users.map((user) => {
-//             const selected = selectedUser === user.id;
-
-//             return (
-//               <Pressable
-//                 key={user.id}
-//                 onPress={() => setSelectedUser(user.id)}
-//                 style={[
-//                   styles.userButton,
-//                   selected && styles.userButtonSelected,
-//                 ]}
-//               >
-//                 <View
-//                   style={[
-//                     styles.initialsCircle,
-//                     {
-//                       backgroundColor: selected
-//                         ? colors.whiteSoft
-//                         : user.color,
-//                     },
-//                   ]}
-//                 >
-//                   <ThemedText
-//                     style={[
-//                       styles.initials,
-//                       selected && { color: colors.primary },
-//                     ]}
-//                   >
-//                     {user.initials}
-//                   </ThemedText>
-//                 </View>
-
-//                 <ThemedText
-//                   style={[
-//                     styles.userName,
-//                     selected && styles.selectedText,
-//                   ]}
-//                 >
-//                   {user.name}
-//                 </ThemedText>
-//               </Pressable>
-//             );
-//           })}
-
-//           <Pressable style={styles.everyoneButton}>
-//             <Plus size={16} color={colors.textMuted} />
-//             <ThemedText style={styles.everyoneText}>Everyone</ThemedText>
-//           </Pressable>
-//         </View>
-//       </View>
-
-//       {/* Actions */}
-//       <View style={styles.actions}>
-//         <Pressable style={styles.submitButton}>
-//           <ThemedText style={styles.submitText}>Create Chore</ThemedText>
-//         </Pressable>
-
-//         <Pressable style={styles.backButton}>
-//           <ThemedText style={styles.backText}>Go Back</ThemedText>
-//         </Pressable>
-//       </View>
-//     </View>
-//   );
-// }
 
 const styles = StyleSheet.create({
   form: {
@@ -437,6 +309,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: colors.textMuted,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
   actions: {
     paddingTop: 16,

@@ -8,15 +8,11 @@ import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Bath,
-  Brush,
   CheckCircle2,
   Circle,
   Droplets,
   Plus,
-  ShoppingCart,
   User,
-  Utensils,
   X,
 } from "lucide-react-native";
 import { useState, useEffect } from "react";
@@ -30,13 +26,6 @@ import {
   useWindowDimensions,
 } from "react-native";
 
-// type Chore = {
-//   id: number;
-//   title: string;
-//   subtitle: string;
-//   completed: boolean;
-//   icon: React.ElementType;
-// };
 type Chore = {
   choreId: number;
   choreName: string;
@@ -95,23 +84,6 @@ export default function ChoresPage() {
 
     loadChores();
   }, [householdId]);
-
-  // const [chores, setChores] = useState<Chore[]>([
-  //   {
-  //     id: 1,
-  //     title: "Wash the dishes",
-  //     subtitle: "Daily • 10 mins",
-  //     icon: Utensils,
-  //     completed: false,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Vacuum living room",
-  //     subtitle: "Weekly • 20 mins",
-  //     icon: Brush,
-  //     completed: false,
-  //   },
-  // ]);
 
   const toggleChore = (id: number) => {
     setChores((prev) =>
@@ -249,31 +221,7 @@ export default function ChoresPage() {
             )}
           </ChoreList>
 
-          {/* Household */}
-          {/* <ChoreList
-            title="My Household"
-            icon={Brush}
-            badge="5 tasks"
-            badgeType="secondary"
-          >
-            <View style={styles.choreCard}>
-              <View style={styles.choreIconSecondary}>
-                <Bath size={22} color={colors.text} />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <ThemedText style={styles.choreTitle}>
-                  Clean bathroom
-                </ThemedText>
-
-                <ThemedText style={styles.choreSubtitle}>
-                  Liam • In progress
-                </ThemedText>
-              </View>
-            </View>
-          </ChoreList> */}
-
-          {/* Upcoming */}
+          {/* Upcoming Chores */}
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>
               Upcoming
@@ -284,31 +232,6 @@ export default function ChoresPage() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.upcomingList}
             >
-              {/* <View style={styles.upcomingCard}>
-                <Droplets size={24} color={colors.primary} />
-                <ThemedText style={styles.upcomingTitle}>
-                  Water the plants
-                </ThemedText>
-                <ThemedText style={styles.upcomingDescription}>
-                  Don't forget the ferns in the balcony.
-                </ThemedText>
-                <ThemedText style={styles.timeTag}>
-                  Tomorrow
-                </ThemedText>
-              </View>
-
-              <View style={styles.upcomingCard}>
-                <ShoppingCart size={24} color={colors.primary} />
-                <ThemedText style={styles.upcomingTitle}>
-                  Grocery Restock
-                </ThemedText>
-                <ThemedText style={styles.upcomingDescription}>
-                  Shared trip with Liam to Market St.
-                </ThemedText>
-                <ThemedText style={styles.timeTag}>
-                  Sat, 10 AM
-                </ThemedText>
-              </View> */}
               {upcoming.map((chore) => (
                 <View key={chore.choreId} style={styles.upcomingCard}>
                   <Droplets size={24} color={colors.primary} />
