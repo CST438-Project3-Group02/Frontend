@@ -28,15 +28,12 @@ export default function ChoreForm({
   onCancel,
 }: ChoreFormProps) {
   const [selectedUser, setSelectedUser] = useState("2");
-
-  // CHANGE: added state for form fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // CHANGE: submit handler
   async function handleSubmit() {
     if (!title.trim()) {
       console.error("Chore name is required");
