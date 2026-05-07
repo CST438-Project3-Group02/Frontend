@@ -1,9 +1,9 @@
+import { getChoresByHousehold } from "@/api/chores";
 import ChoreForm from "@/components/chores/ChoreForm";
 import ChoreList from "@/components/chores/ChoreList";
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -15,8 +15,7 @@ import {
   User,
   X,
 } from "lucide-react-native";
-import { useState, useEffect } from "react";
-import { getChoresByHousehold } from "@/api/chores";
+import { useEffect, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -131,18 +130,13 @@ export default function ChoresPage() {
             { id: "chores", label: "Chores", icon: "checkbox", active: true },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "household", label: "My Household", icon: "home" },
-            { id: "settings", label: "Settings", icon: "settings" },
+            { id: "household", label: "My Household", icon: "home" }
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1 }}>
-        <Topbar />
-
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={[

@@ -1,6 +1,7 @@
 import { getHouseholdsByProfile } from '@/api/households';
 import CreateHouseholdCard from '@/components/households/CreateHouseholdCard';
 import HouseholdCard from '@/components/households/HouseholdCard';
+import Topbar from '@/components/layout/Topbar';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { Household } from '@/types/household';
 import { router } from 'expo-router';
@@ -45,9 +46,7 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.topBar}>
-          <Text style={styles.brand}>Roomie</Text>
-        </View>
+        <Topbar />
 
         <View style={styles.heroSection}>
           <Text style={styles.heroTitle}>My Households</Text>
@@ -107,6 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   heroSection: {
+    marginTop: 14,
     marginBottom: 28,
     maxWidth: 680,
   },

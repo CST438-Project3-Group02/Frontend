@@ -1,4 +1,5 @@
-import { getHousehold, getMembership } from '@/api/households'
+import { getHousehold } from '@/api/households'
+import { getMembership } from '@/api/memberships'
 import { useAuthContext } from '@/hooks/use-auth-context'
 import { HouseholdContext, HouseholdDetails, MembershipDetails } from '@/hooks/use-household-context'
 import { Stack, useLocalSearchParams } from 'expo-router'
@@ -21,6 +22,7 @@ export default function HouseholdLayout() {
                     getHousehold(householdId),
                     getMembership(profile.profileId, householdId)
                 ])
+
                 setHousehold(householdData)
                 setMembership(membershipData)
             } catch (error) {

@@ -1,16 +1,19 @@
 import { deleteHousehold, getHouseholdWithProfiles, updateHousehold } from "@/api/households";
+import { deleteMembership } from "@/api/memberships";
 import RightPanel from "@/components/dashboard/RightPanel";
 import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
+import ManageMemberModal from "@/components/households/ManageMemberModal";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { useHouseholdContext } from "@/hooks/use-household-context";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -18,18 +21,22 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 
 export default function HouseholdSettings() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
+
+  const { profile } = useAuthContext();
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
   const { household, membership, setHousehold } = useHouseholdContext();
 
   const [members, setMembers] = useState<any[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false);
+  const [manageMemberModal, setManageMemberModal] = useState(false);
 
   // Editable fields
   const [householdName, setHouseholdName] = useState('');
@@ -44,6 +51,7 @@ export default function HouseholdSettings() {
   const isAdmin = (membership?.privs ?? 99) <= 2;
   const isOwner = membership?.privs === 1;
   const canEdit = isAdmin;
+  const canLeave = (membership?.privs ?? 99) >= 2;
 
   useEffect(() => {
     if (household) {
@@ -58,15 +66,16 @@ export default function HouseholdSettings() {
     }
   }, [household]);
 
+  const fetchMembers = async () => {
+    try {
+      const data = await getHouseholdWithProfiles(householdId);
+      setMembers(data.profiles ?? []);
+    } catch (error) {
+      console.error('Failed to fetch members', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const data = await getHouseholdWithProfiles(householdId);
-        setMembers(data.profiles ?? []);
-      } catch (error) {
-        console.error('Failed to fetch members', error);
-      }
-    };
     fetchMembers();
   }, [householdId]);
 
@@ -110,6 +119,18 @@ export default function HouseholdSettings() {
     }
   };
 
+  const onLeave = async () => {
+    if (!membership) return;
+
+    try {
+      await deleteMembership(membership?.profileHouseholdId);
+      setDeleteModalVisible(false);
+      router.replace('/households');
+    } catch (error) {
+      console.error('Failed to leave household', error);
+    }
+  };
+
   return (
     <View style={{ flex: 1, flexDirection: isMobile ? "column" : "row", backgroundColor: colors.background }}>
       {!isMobile && (
@@ -119,17 +140,13 @@ export default function HouseholdSettings() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "household", label: "My Household", icon: "home", active: true },
-            { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
         <ScrollView contentContainerStyle={styles.page}>
           <View style={styles.header}>
             <ThemedText style={styles.eyebrow}>HOUSEHOLD PROFILE</ThemedText>
@@ -167,7 +184,6 @@ export default function HouseholdSettings() {
                     value={numOfBedrooms}
                     onChangeText={setNumOfBedrooms}
                     editable={canEdit}
-                    hasChevron
                   />
                 </View>
               </SectionCard>
@@ -196,6 +212,12 @@ export default function HouseholdSettings() {
                 </View>
               )}
 
+              {canLeave && (
+                <TouchableOpacity style={styles.leaveButton} onPress={() => setLeaveModalVisible(true)}>
+                  <ThemedText style={styles.leaveButtonText}>Leave Household</ThemedText>
+                </TouchableOpacity>
+              )}
+
               {isOwner && (
                 <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteModalVisible(true)}>
                   <Feather name="trash-2" size={18} color={colors.danger} />
@@ -208,9 +230,11 @@ export default function HouseholdSettings() {
               <View style={styles.membersCard}>
                 <View style={styles.membersHeader}>
                   <ThemedText style={styles.membersTitle}>Members</ThemedText>
-                  <View style={styles.memberCountPill}>
-                    <ThemedText style={styles.memberCountText}>{members.length} Total</ThemedText>
-                  </View>
+                  {isOwner &&
+                    <Pressable onPress={() => setManageMemberModal(true)}>
+                      <Feather name="settings" size={18} color={colors.danger} />
+                    </Pressable>
+                  }
                 </View>
 
                 {members.length === 0 ? (
@@ -221,7 +245,23 @@ export default function HouseholdSettings() {
                   <View style={styles.membersList}>
                     {members.map((member: any) => (
                       <View key={member.profileId} style={styles.memberRow}>
-                        <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                        {member.profilePicUrl ? 
+                          ( 
+                            <Image source={{ uri: member.profilePicUrl }} style={styles.avatar} /> 
+                          ) : 
+                          (
+                            <View style={styles.avatarFallback}>
+                              <ThemedText style={styles.avatarInitial}>
+                                {member.name?.charAt(0).toUpperCase() ?? '?'}
+                              </ThemedText>
+                            </View>
+                          )}
+                        <View style={styles.memberInfo}>             
+                          <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                          <ThemedText style={styles.role}>
+                            { member.memberships.privs === 1 ? 'owner' : member.memberships.privs === 2 ? 'admin' : 'member' }
+                          </ThemedText>
+                        </View>
                       </View>
                     ))}
                   </View>
@@ -251,6 +291,13 @@ export default function HouseholdSettings() {
 
       {!isMobile && <RightPanel />}
 
+      <ManageMemberModal 
+        members={members}
+        setModal={setManageMemberModal}
+        isVisible={manageMemberModal}
+        onMemberUpdate={fetchMembers}
+      />
+
       {/* Delete Confirmation Modal */}
       <Modal
         transparent
@@ -272,6 +319,32 @@ export default function HouseholdSettings() {
               </Pressable>
               <Pressable style={styles.confirmDeleteButton} onPress={onDelete}>
                 <ThemedText style={styles.confirmDeleteText}>Delete</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Leave Confirmation Modal */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={leaveModalVisible}
+        onRequestClose={() => setLeaveModalVisible(false)}
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modalCard}>
+            <ThemedText style={styles.modalTitle}>Leave Household</ThemedText>
+            <ThemedText style={styles.modalSubtitle}>
+              Are you sure you want to leave{' '}
+              <ThemedText style={styles.modalBold}>{householdName}</ThemedText>?
+            </ThemedText>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelButton} onPress={() => setLeaveModalVisible(false)}>
+                <ThemedText style={styles.cancelText}>Cancel</ThemedText>
+              </Pressable>
+              <Pressable style={styles.confirmDeleteButton} onPress={onLeave}>
+                <ThemedText style={styles.confirmDeleteText}>Leave</ThemedText>
               </Pressable>
             </View>
           </View>
@@ -443,9 +516,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   memberRow: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 10,
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSoft,
+  },
+  memberInfo: {
+    flex: 1,
+    gap: 3
   },
   memberName: {
     fontSize: 14,
@@ -628,6 +708,54 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  leaveButton: {
+    minWidth: 180,
+    height: 62,
+    borderRadius: 31,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    backgroundColor: colors.surface,
+  },
+  leaveButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  role: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '500',
+    alignSelf: 'flex-start',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: colors.borderSoft 
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  avatarFallback: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    fontSize: 15,
     fontWeight: '600',
     color: colors.primary,
   },

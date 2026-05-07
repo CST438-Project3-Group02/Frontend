@@ -1,6 +1,3 @@
-import RightPanel from "@/components/dashboard/RightPanel";
-import BottomNavigation from "@/components/layout/BottomNavigation";
-import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import SignOutButton from "@/components/social-auth-buttons/SignOutButton";
 import { ThemedText } from "@/components/themed-text";
@@ -28,7 +25,6 @@ export default function SettingsPage() {
   const isMobile = width < 768;
   const { user, profile, isProfileLoading, refetchProfile } = useAuthContext();
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
-
 
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -141,28 +137,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSignOut = async () => {
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      {
-        text: "Cancel",
-        onPress: () => {},
-        style: "cancel",
-      },
-      {
-        text: "Sign Out",
-        onPress: async () => {
-          try {
-            await supabase.auth.signOut();
-            router.replace("/login");
-          } catch (error) {
-            Alert.alert("Error", "Failed to sign out");
-          }
-        },
-        style: "destructive",
-      },
-    ]);
-  };
-
   return (
     <View
       style={{
@@ -171,28 +145,7 @@ export default function SettingsPage() {
         backgroundColor: colors.background,
       }}
     >
-      {!isMobile && (
-        <Sidebar
-          items={[
-            { id: "activity", label: "Activity", icon: "list" },
-            { id: "chores", label: "Chores", icon: "checkbox" },
-            { id: "expenses", label: "Expenses", icon: "receipt" },
-            { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "household", label: "My Household", icon: "home" },
-            {
-              id: "settings",
-              label: "Settings",
-              icon: "settings",
-              active: true,
-            },
-          ]}
-          householdId={householdId}
-          onRoomiePress={() => router.push("/")}
-        />
-      )}
-
-      <View style={{ flex: 1, flexDirection: "column" }}>
+      <View style={{ flex: 1, flexDirection: "column", justifyContent: 'center', alignItems: '' }}>
         <Topbar />
         <ScrollView
           style={{
@@ -385,8 +338,10 @@ export default function SettingsPage() {
                 <View
                   style={{
                     flexDirection: "row",
-                    gap: 12,
+                    alignContent: "center",
+                    justifyContent: "center",
                     marginTop: 20,
+                    gap: 12
                   }}
                 >
                   {isEditing ? (
@@ -442,48 +397,52 @@ export default function SettingsPage() {
                       </TouchableOpacity>
                     </>
                   ) : (
-                    <TouchableOpacity
-                      onPress={() => setIsEditing(true)}
-                      style={{
-                        flex: 1,
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        borderRadius: 8,
-                        backgroundColor: colors.primary,
-                      }}
-                    >
-                      <ThemedText
-                        style={{
-                          textAlign: "center",
-                          fontWeight: "600",
-                          color: "white",
-                        }}
-                      >
-                        Edit Profile
-                      </ThemedText>
-                    </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setIsEditing(true)}
+                    style={{
+                      alignSelf: 'center',
+                      width: 250,
+                      paddingHorizontal: 24,
+                      paddingVertical: 12,
+                      borderRadius: 8,
+                      backgroundColor: colors.primary,
+                    }}
+                  >
+                    <ThemedText style={{ textAlign: "center", fontWeight: "600", color: "white" }}>
+                      Edit Profile
+                    </ThemedText>
+                  </TouchableOpacity>
                   )}
                 </View>
               </View>
-              <SignOutButton />
+                {/* Bottom Actions */}
+                <View style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 12,
+                }}>
+                  <TouchableOpacity
+                    onPress={() => router.push('/households')}
+                    style={{
+                      alignItems: 'center',
+                      paddingHorizontal: 20,
+                      paddingVertical: 14,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: colors.borderSoft,
+                      backgroundColor: colors.surface,
+                    }}
+                  >
+                    <ThemedText style={{ fontSize: 14, fontWeight: '600', color: colors.primary }}>
+                      My Households
+                    </ThemedText>
+                  </TouchableOpacity>
+                  <SignOutButton />
+                </View>
             </View>
           )}
         </ScrollView>
-        {isMobile && (
-          <BottomNavigation
-            items={[
-              { id: "activity", label: "Activity", icon: "list" },
-              { id: "chores", label: "Chores", icon: "checkbox" },
-              { id: "expenses", label: "Expenses", icon: "receipt" },
-              { id: "groceries", label: "Groceries", icon: "cart" },
-              { id: "chat", label: "Chat", icon: "chatbubble" },
-            ]}
-            householdId={householdId}
-          />
-        )}
       </View>
-
-      {!isMobile && <RightPanel />}
     </View>
   );
 }

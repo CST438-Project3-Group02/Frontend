@@ -1,7 +1,6 @@
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -34,17 +33,13 @@ export default function ExpensesPage() {
               active: true,
             },
             { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "household", label: "My Household", icon: "home" },
-            { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
         >

@@ -77,8 +77,3 @@ export function generateInviteCode(profileId : number, householdId : number | st
 export function getInviteDetails(inviteCode : string) {
   return request(`/api/invite?inviteCode=${inviteCode}`);
 }
-
-// Get a user's membership info
-export function getMembership(profileId : number, householdId : number | string) {
-  return request(`/api/memberships?profileId=${profileId}&householdId=${householdId}`);
-}
