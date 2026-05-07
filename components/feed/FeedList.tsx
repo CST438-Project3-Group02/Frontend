@@ -287,19 +287,44 @@ export default function FeedList({
       setIsLoading(true);
       try {
         console.log("Fetching posts for household:", householdId);
-        const fetchedPosts = await getHouseholdPosts(householdId);
-        console.log("Fetched posts:", fetchedPosts);
+        const fetchedActivities = await getHouseholdPosts(householdId);
+        console.log("Fetched activities:", fetchedActivities);
 
-        if (Array.isArray(fetchedPosts) && fetchedPosts.length > 0) {
+        if (Array.isArray(fetchedActivities) && fetchedActivities.length > 0) {
+          // Transform Activity objects to FeedPost format
+          const transformedPosts = fetchedActivities
+            .map((activity: any) => {
+              // Get the first comment as the post content
+              const firstComment = activity.activityComments?.[0];
+              if (!firstComment) return null; // Skip if no comments
+
+              const likes = activity.activityReactions?.length || 0;
+              const comments = activity.activityComments?.length || 0;
+
+              return {
+                id: activity.activityId.toString(),
+                author: firstComment.profile?.name || "Unknown",
+                avatar: firstComment.profile?.profilePicUrl,
+                content: firstComment.comment,
+                timestamp: new Date(activity.createdAt).toLocaleString(),
+                likes,
+                comments,
+                tags: [],
+                liked: false,
+                userReactionId: undefined,
+              };
+            })
+            .filter((post: any) => post !== null);
+
           // Fetch reactions for each post to check if user has liked it
           const postsWithReactions = await Promise.all(
-            fetchedPosts.map(async (post) => {
+            transformedPosts.map(async (post: any) => {
               try {
                 const reactions = await getActivityReactions(post.id);
                 // Find if current user has a like reaction
                 const userLike = Array.isArray(reactions)
                   ? reactions.find(
-                      (r) =>
+                      (r: any) =>
                         r.profileId === profile?.id ||
                         r.profileId === profile?.profileId,
                     )
@@ -321,7 +346,7 @@ export default function FeedList({
           );
           setPosts(postsWithReactions);
         } else {
-          console.log("No posts returned from API, using empty array");
+          console.log("No activities returned from API, using empty array");
           setPosts([]);
         }
       } catch (error) {
