@@ -1,61 +1,53 @@
+import { getAllActivities } from "@/api/activities";
 import { colors } from "@/constants/colors";
+import { useHouseholdContext } from "@/hooks/use-household-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
-export interface FeedPost {
-  id: string;
-  author: string;
-  avatar?: string;
-  content: string;
-  image?: string;
-  timestamp: string;
-  likes?: number;
-  comments?: number;
-  shares?: number;
-  tags?: string[];
+interface Activity {
+  activityId: string;
+  activityType: number;
+  isCompleted: boolean;
+  profile: {
+    name: string;
+    profilePicUrl?: string;
+  };
+  postComment?: string;
+  picUrl?: string;
+  activityComments: any[];
+  activityReactions: any[];
+  createdAt?: string;
 }
 
-interface FeedListProps {
-  posts?: FeedPost[];
-  onPostPress?: (id: string) => void;
-  onLike?: (id: string) => void;
-  isLoading?: boolean;
-}
+const ACTIVITY_LABELS: Record<number, (name: string) => string> = {
+  1: (name) => `${name} completed a chore!`,
+  2: (name) => `${name} created a new chore.`,
+  3: (name) => `${name} created an expense.`,
+  4: (name) => `${name} paid a bill!`,
+  5: (name) => `${name} joined the household!`,
+  6: (name) => `${name} left the household.`,
+};
 
-const MOCK_POSTS: FeedPost[] = [
-  {
-    id: "1",
-    author: "Dr. Clinkenbeard",
-    content: "give me an A",
-    timestamp: "3h ago",
-    likes: 5,
-    comments: 1,
-    tags: ["Expenses"],
-  },
-  {
-    id: "2",
-    author: "Kristopher Church",
-    content: "Is Lebron the goat",
-    timestamp: "5h ago",
-    likes: 8,
-    comments: 2,
-    tags: ["Groceries", "Needed"],
-  },
-];
+const ACTIVITY_ICONS: Record<number, { name: string; color: string }> = {
+  1: { name: "checkmark-circle", color: colors.success },
+  2: { name: "add-circle", color: colors.primary },
+  3: { name: "receipt", color: colors.warning },
+  4: { name: "cash", color: colors.success },
+  5: { name: "person-add", color: colors.primary },
+  6: { name: "person-remove", color: colors.danger },
+};
 
-function FeedPostCard({
-  post,
-  onLike,
-}: {
-  post: FeedPost;
-  onLike?: (id: string) => void;
-}) {
+function ActivityCard({ activity }: { activity: Activity }) {
+  const label = ACTIVITY_LABELS[activity.activityType]?.(activity.profile?.name ?? 'Someone') ?? 'Something happened.';
+  const icon = ACTIVITY_ICONS[activity.activityType] ?? { name: "ellipse", color: colors.textMuted };
+
   return (
     <View
       style={{
-        marginBottom: 16,
-        borderRadius: 8,
+        marginBottom: 12,
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: colors.borderSoft,
         backgroundColor: colors.surface,
@@ -63,200 +55,143 @@ function FeedPostCard({
       }}
     >
       {/* Header */}
-      <View
-        style={{
-          marginBottom: 12,
-          flexDirection: "row",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
-            flex: 1,
-          }}
-        >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 }}>
+        {activity.profile?.profilePicUrl ? (
+          <Image
+            source={{ uri: activity.profile.profilePicUrl }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+        ) : (
           <View
             style={{
-              height: 40,
               width: 40,
+              height: 40,
               borderRadius: 20,
-              backgroundColor: colors.primary,
+              backgroundColor: colors.surfaceSoft,
+              borderWidth: 1,
+              borderColor: colors.borderSoft,
+              justifyContent: "center",
+              alignItems: "center",
             }}
-          />
-          <View style={{ flex: 1 }}>
-            <ThemedText
-              style={{
-                fontWeight: "600",
-                color: colors.text,
-              }}
-            >
-              {post.author}
-            </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                color: colors.textMuted,
-              }}
-            >
-              {post.timestamp}
+          >
+            <ThemedText style={{ fontWeight: "600", color: colors.primary }}>
+              {activity.profile?.name?.charAt(0).toUpperCase() ?? "?"}
             </ThemedText>
           </View>
+        )}
+
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Ionicons name={icon.name as any} size={16} color={icon.color} />
+            <ThemedText style={{ fontWeight: "600", color: colors.text, fontSize: 14 }}>
+              {label}
+            </ThemedText>
+          </View>
+          {activity.createdAt && (
+            <ThemedText style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
+              {new Date(activity.createdAt).toLocaleDateString(undefined, {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+              })}
+            </ThemedText>
+          )}
         </View>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={20} color={colors.primary} />
-        </TouchableOpacity>
       </View>
 
-      {/* Content */}
-      <ThemedText
-        style={{
-          marginBottom: 12,
-          color: colors.text,
-        }}
-      >
-        {post.content}
-      </ThemedText>
+      {/* Optional comment */}
+      {activity.postComment && (
+        <ThemedText style={{ fontSize: 14, color: colors.text, marginBottom: 10 }}>
+          {activity.postComment}
+        </ThemedText>
+      )}
 
-      {/* Image */}
-      {post.image && (
+      {/* Optional image */}
+      {activity.picUrl && (
         <Image
-          source={{ uri: post.image }}
+          source={{ uri: activity.picUrl }}
           style={{
-            marginBottom: 12,
-            height: 192,
+            height: 180,
             width: "100%",
             borderRadius: 8,
             backgroundColor: colors.surfaceSoft,
+            marginBottom: 10,
           }}
         />
-      )}
-
-      {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
-        <View
-          style={{
-            marginBottom: 12,
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          {post.tags.map((tag) => (
-            <View
-              key={tag}
-              style={{
-                borderRadius: 16,
-                backgroundColor: colors.surfaceSoft,
-                paddingHorizontal: 12,
-                paddingVertical: 4,
-              }}
-            >
-              <ThemedText
-                style={{
-                  fontSize: 12,
-                  fontWeight: "500",
-                  color: colors.text,
-                }}
-              >
-                {tag}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
       )}
 
       {/* Actions */}
       <View
         style={{
           flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          gap: 20,
           borderTopWidth: 1,
           borderTopColor: colors.borderSoft,
-          paddingTop: 12,
+          paddingTop: 10,
+          marginTop: 4,
         }}
       >
-        <TouchableOpacity
-          onPress={() => onLike?.(post.id)}
-          style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-        >
-          <Ionicons name="heart-outline" size={18} color={colors.primary} />
-          {post.likes !== undefined && (
-            <ThemedText
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-              }}
-            >
-              {post.likes}
-            </ThemedText>
-          )}
+        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="heart-outline" size={18} color={colors.textMuted} />
+          <ThemedText style={{ fontSize: 13, color: colors.textMuted }}>
+            {activity.activityReactions?.length ?? 0}
+          </ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-        >
-          <Ionicons
-            name="chatbubble-outline"
-            size={18}
-            color={colors.primary}
-          />
-          {post.comments !== undefined && (
-            <ThemedText
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-              }}
-            >
-              {post.comments}
-            </ThemedText>
-          )}
+        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
+          <ThemedText style={{ fontSize: 13, color: colors.textMuted }}>
+            {activity.activityComments?.length ?? 0}
+          </ThemedText>
         </TouchableOpacity>
-        {/* Share button commented out for now - not needed in first version */}
-        {/* <TouchableOpacity
-          style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-        >
-          <Ionicons
-            name="share-social-outline"
-            size={18}
-            color={colors.primary}
-          />
-          {post.shares !== undefined && (
-            <ThemedText
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-              }}
-            >
-              {post.shares}
-            </ThemedText>
-          )}
-        </TouchableOpacity> */}
       </View>
     </View>
   );
 }
 
-export default function FeedList({
-  posts = MOCK_POSTS,
-  onPostPress,
-  onLike,
-  isLoading,
-}: FeedListProps) {
+export default function FeedList() {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { household } = useHouseholdContext();
+
+  useEffect(() => {
+    if (!household?.householdId) return;
+
+    const fetchActivities = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getAllActivities(household.householdId);
+        setActivities(data ?? []);
+      } catch (err) {
+        console.error("Failed to fetch activities", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, [household?.householdId]);
+  
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ThemedText style={{ color: colors.textMuted }}>Loading activity...</ThemedText>
+      </View>
+    );
+  }
+
+  if (activities.length === 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 32 }}>
+        <Ionicons name="newspaper-outline" size={40} color={colors.borderSoft} />
+        <ThemedText style={{ color: colors.textMuted, marginTop: 12, textAlign: "center" }}>
+          No activity yet. Complete chores, pay bills, or invite members to get started!
+        </ThemedText>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView
-      style={{
-        flex: 1,
-        padding: 16,
-      }}
-    >
-      {posts.map((post) => (
-        <TouchableOpacity key={post.id} onPress={() => onPostPress?.(post.id)}>
-          <FeedPostCard post={post} onLike={onLike} />
-        </TouchableOpacity>
+    <ScrollView style={{ flex: 1, padding: 16 }}>
+      {activities.map((activity) => (
+        <ActivityCard key={activity.activityId} activity={activity} />
       ))}
     </ScrollView>
   );
