@@ -1,6 +1,8 @@
-import { deleteHousehold, getHouseholdWithProfiles, leaveHousehold, updateHousehold } from "@/api/households";
+import { deleteHousehold, getHouseholdWithProfiles, updateHousehold } from "@/api/households";
+import { deleteMembership } from "@/api/memberships";
 import RightPanel from "@/components/dashboard/RightPanel";
 import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
+import ManageMemberModal from "@/components/households/ManageMemberModal";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
@@ -12,6 +14,7 @@ import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -19,7 +22,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 
 export default function HouseholdSettings() {
@@ -34,6 +37,7 @@ export default function HouseholdSettings() {
   const [members, setMembers] = useState<any[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [leaveModalVisible, setLeaveModalVisible] = useState(false);
+  const [manageMemberModal, setManageMemberModal] = useState(false);
 
   // Editable fields
   const [householdName, setHouseholdName] = useState('');
@@ -63,16 +67,16 @@ export default function HouseholdSettings() {
     }
   }, [household]);
 
+  const fetchMembers = async () => {
+    try {
+      const data = await getHouseholdWithProfiles(householdId);
+      setMembers(data.profiles ?? []);
+    } catch (error) {
+      console.error('Failed to fetch members', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const data = await getHouseholdWithProfiles(householdId);
-        console.log(data.profiles)
-        setMembers(data.profiles ?? []);
-      } catch (error) {
-        console.error('Failed to fetch members', error);
-      }
-    };
     fetchMembers();
   }, [householdId]);
 
@@ -120,7 +124,7 @@ export default function HouseholdSettings() {
     if (!membership) return;
 
     try {
-      await leaveHousehold(membership?.profileHouseholdId);
+      await deleteMembership(membership?.profileHouseholdId);
       setDeleteModalVisible(false);
       router.replace('/households');
     } catch (error) {
@@ -231,7 +235,7 @@ export default function HouseholdSettings() {
                 <View style={styles.membersHeader}>
                   <ThemedText style={styles.membersTitle}>Members</ThemedText>
                   {isOwner &&
-                    <Pressable>
+                    <Pressable onPress={() => setManageMemberModal(true)}>
                       <Feather name="settings" size={18} color={colors.danger} />
                     </Pressable>
                   }
@@ -245,10 +249,23 @@ export default function HouseholdSettings() {
                   <View style={styles.membersList}>
                     {members.map((member: any) => (
                       <View key={member.profileId} style={styles.memberRow}>
-                        <ThemedText style={styles.memberName}>{member.name}</ThemedText>
-                        <ThemedText style={styles.role}>
-                          { member.memberships.privs === 1 ? 'owner' : member.memberships.privs === 2 ? 'admin' : 'member' }
-                        </ThemedText>
+                        {member.profilePicUrl ? 
+                          ( 
+                            <Image source={{ uri: member.profilePicUrl }} style={styles.avatar} /> 
+                          ) : 
+                          (
+                            <View style={styles.avatarFallback}>
+                              <ThemedText style={styles.avatarInitial}>
+                                {member.name?.charAt(0).toUpperCase() ?? '?'}
+                              </ThemedText>
+                            </View>
+                          )}
+                        <View style={styles.memberInfo}>             
+                          <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                          <ThemedText style={styles.role}>
+                            { member.memberships.privs === 1 ? 'owner' : member.memberships.privs === 2 ? 'admin' : 'member' }
+                          </ThemedText>
+                        </View>
                       </View>
                     ))}
                   </View>
@@ -277,6 +294,13 @@ export default function HouseholdSettings() {
       </View>
 
       {!isMobile && <RightPanel />}
+
+      <ManageMemberModal 
+        members={members}
+        setModal={setManageMemberModal}
+        isVisible={manageMemberModal}
+        onMemberUpdate={fetchMembers}
+      />
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -498,11 +522,14 @@ const styles = StyleSheet.create({
   memberRow: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 10,
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSoft,
+  },
+  memberInfo: {
+    flex: 1,
+    gap: 3
   },
   memberName: {
     fontSize: 14,
@@ -708,10 +735,32 @@ const styles = StyleSheet.create({
   },
   role: {
     color: colors.text,
+    fontSize: 12,
     fontWeight: '500',
+    alignSelf: 'flex-start',
     borderRadius: 32,
     paddingHorizontal: 8,
     paddingVertical: 3,
     backgroundColor: colors.borderSoft 
-  }
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  avatarFallback: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.primary,
+  },
 });

@@ -47,11 +47,6 @@ export async function joinHousehold(profileId : number, householdId : number | s
   }); 
 }
 
-// Leave a household
-export async function leaveHousehold(membershipId : number) {
-  return request(`/api/memberships/${membershipId}`); 
-}
-
 // update a household
 export function updateHousehold(householdId: string, data: any) {
   return request(`/api/households/${householdId}`, {
@@ -81,9 +76,4 @@ export function generateInviteCode(profileId : number, householdId : number | st
 // Inviting a user to a household
 export function getInviteDetails(inviteCode : string) {
   return request(`/api/invite?inviteCode=${inviteCode}`);
-}
-
-// Get a user's membership info
-export function getMembership(profileId : number, householdId : number | string) {
-  return request(`/api/memberships?profileId=${profileId}&householdId=${householdId}`);
 }

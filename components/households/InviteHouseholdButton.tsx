@@ -133,8 +133,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalCard: {
-    width: "100%",
-    maxWidth: 724,
+    maxWidth: 450,
     maxHeight: 600,
     borderRadius: 34,
     padding: 28,
@@ -165,9 +164,9 @@ const styles = StyleSheet.create({
   },
   inviteLink: {
     maxWidth: "100%",
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.dark,
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.tertiary,
   },
   expiryText: {
     marginTop: 14,
