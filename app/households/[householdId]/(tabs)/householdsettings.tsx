@@ -5,7 +5,6 @@ import InviteHouseholdButton from "@/components/households/InviteHouseholdButton
 import ManageMemberModal from "@/components/households/ManageMemberModal";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useAuthContext } from "@/hooks/use-auth-context";
@@ -141,17 +140,13 @@ export default function HouseholdSettings() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
             { id: "household", label: "My Household", icon: "home", active: true },
-            { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
         <ScrollView contentContainerStyle={styles.page}>
           <View style={styles.header}>
             <ThemedText style={styles.eyebrow}>HOUSEHOLD PROFILE</ThemedText>

@@ -26,7 +26,6 @@ export default function InviteHouseholdButton() {
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
   const { profile } = useAuthContext();
 
-
   const onInvite = async () => {
       if (!profile) return;
 

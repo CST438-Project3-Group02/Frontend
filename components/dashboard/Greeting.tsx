@@ -43,7 +43,7 @@ export default function Greeting() {
           color: colors.textMuted,
         }}
       >
-        The sanctuary is humming with activity today.
+        The household is humming with activity today.
       </ThemedText>
     </View>
   );
