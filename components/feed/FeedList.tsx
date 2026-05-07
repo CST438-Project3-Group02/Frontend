@@ -158,6 +158,7 @@ export default function FeedList() {
       setIsLoading(true);
       try {
         const data = await getAllActivities(household.householdId);
+        console.log(data)
         setActivities(data ?? []);
       } catch (err) {
         console.error("Failed to fetch activities", err);
