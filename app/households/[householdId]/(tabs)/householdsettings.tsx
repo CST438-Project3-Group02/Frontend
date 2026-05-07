@@ -209,12 +209,13 @@ export default function HouseholdSettings() {
                   <TouchableOpacity style={styles.discardButton} onPress={onDiscard}>
                     <ThemedText style={styles.discardButtonText}>Discard Edits</ThemedText>
                   </TouchableOpacity>
-                  {canLeave && (
-                    <TouchableOpacity style={styles.leaveButton} onPress={() => setLeaveModalVisible(true)}>
-                      <ThemedText style={styles.leaveButtonText}>Leave Household</ThemedText>
-                    </TouchableOpacity>
-                  )}
                 </View>
+              )}
+
+              {canLeave && (
+                <TouchableOpacity style={styles.leaveButton} onPress={() => setLeaveModalVisible(true)}>
+                  <ThemedText style={styles.leaveButtonText}>Leave Household</ThemedText>
+                </TouchableOpacity>
               )}
 
               {isOwner && (
