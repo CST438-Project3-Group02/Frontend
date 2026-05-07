@@ -1,6 +1,7 @@
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
 import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import {
@@ -219,7 +220,6 @@ function ExpenseCard({
   const [expanded, setExpanded] = useState(false);
   const bills = expense.bills || [];
 
-  // ✅ calculate per-person dollar amount from splitAmount percentage
   const perPersonAmount =
     expense.splitAmount > 0
       ? expense.amount * (expense.splitAmount / 100)
@@ -229,7 +229,6 @@ function ExpenseCard({
 
   return (
     <View style={styles.expenseCard}>
-      {/* ✅ TouchableOpacity is more reliable than Pressable for nested press */}
       <TouchableOpacity
         style={styles.expenseCardHeader}
         onPress={() => setExpanded((prev) => !prev)}
@@ -279,7 +278,6 @@ function ExpenseCard({
         />
       </TouchableOpacity>
 
-      {/* ✅ Bills breakdown — shows individual bills not household expense */}
       {expanded && (
         <View style={styles.billsList}>
           <View style={styles.divider} />
@@ -343,7 +341,6 @@ function NewExpenseModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      {/* ✅ justifyContent center so modal appears in middle of screen */}
       <View style={styles.modalOverlay}>
         <View style={styles.modalSheet}>
           <View style={styles.modalHandle} />
@@ -551,7 +548,6 @@ export default function ExpensesPage() {
         getBillsByProfileAndHousehold(currentProfileId, Number(householdId)),
       ]);
 
-      // ✅ handle both array and wrapped object responses
       const expensesList = Array.isArray(expensesData)
         ? expensesData
         : expensesData?.expenses || [];
@@ -616,7 +612,6 @@ export default function ExpensesPage() {
     }
   }
 
-  // ✅ guard against null/undefined in reduce
   const totalThisMonth = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   const myUnpaidBills = myBills.filter((b) => !b.paid);
   const myShare = myUnpaidBills.reduce((sum, b) => sum + (b.amount || 0), 0);
@@ -657,12 +652,17 @@ export default function ExpensesPage() {
             { id: "household", label: "My Household", icon: "home" },
           ]}
           householdId={householdId}
+          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <View
-          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
+        <Topbar />
+
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.pageHeader}>
             <View>
@@ -771,6 +771,8 @@ export default function ExpensesPage() {
         </ScrollView>
       </View>
 
+      {!isMobile && <RightPanel />}
+
       {isMobile && (
         <BottomNavigation
           items={[
@@ -802,7 +804,6 @@ export default function ExpensesPage() {
         onMarkPaid={handleMarkBillPaid}
         marking={markingPaid}
       />
-      {!isMobile && <RightPanel />}
     </View>
   );
 }
@@ -1046,8 +1047,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: "center",
   },
-
-  // ✅ Modal centered
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
