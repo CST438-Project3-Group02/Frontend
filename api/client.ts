@@ -1,9 +1,9 @@
 
 // dev
-const BASE_URL = 'http://localhost:8080';
+// const BASE_URL = 'http://localhost:8080';
 
 // prod
-// const BASE_URL = 'https://roomie-production-06da.up.railway.app';
+const BASE_URL = 'https://roomie-production-06da.up.railway.app';
 
 // TODO: JWT with bearer token eventually
 export async function request(endpoint : string, options : RequestInit = {}) {
