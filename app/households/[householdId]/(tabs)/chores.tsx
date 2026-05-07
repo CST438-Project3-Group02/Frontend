@@ -39,7 +39,7 @@ export default function ChoresPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
         >

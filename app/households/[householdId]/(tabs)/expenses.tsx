@@ -13,7 +13,6 @@ export default function ExpensesPage() {
   const isMobile = width < 768;
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
 
-
   return (
     <View
       style={{
@@ -44,7 +43,7 @@ export default function ExpensesPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
         >

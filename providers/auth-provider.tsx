@@ -1,14 +1,35 @@
-import { getUserByOauthID } from '@/api/profiles';
-import { AuthContext } from '@/hooks/use-auth-context';
-import { supabase } from '@/lib/supabase';
-import type { Session } from '@supabase/supabase-js';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { getUserByOauthID } from "@/api/profiles";
+import { AuthContext } from "@/hooks/use-auth-context";
+import { supabase } from "@/lib/supabase";
+import type { Session } from "@supabase/supabase-js";
+import { PropsWithChildren, useEffect, useState } from "react";
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
+
+  const refetchProfile = async () => {
+    const oauthId = session?.user?.id;
+    if (!oauthId) {
+      setProfile(null);
+      return;
+    }
+
+    setIsProfileLoading(true);
+    try {
+      console.log("Refetching profile for OAuth ID:", oauthId);
+      const data = await getUserByOauthID(oauthId);
+      console.log("Profile fetched:", data);
+      setProfile(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setProfile(null);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -55,13 +76,14 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       setIsProfileLoading(true);
 
       try {
+        console.log("Initial profile fetch for OAuth ID:", oauthId);
         const data = await getUserByOauthID(oauthId);
-        
         if (!mounted) return;
+        console.log("Initial profile fetch result:", data);
         setProfile(data);
       } catch (error) {
         if (!mounted) return;
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
         setProfile(null);
       } finally {
         if (!mounted) return;
@@ -85,6 +107,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         profile,
         session,
         user: session?.user ?? null,
+        refetchProfile,
       }}
     >
       {children}

@@ -8,12 +8,12 @@ import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
 } from "react-native";
 
 type GroceryItem = {
@@ -79,20 +79,16 @@ export default function GroceriesPage() {
   const handleToggleItem = (itemId: number) => {
     setGroceries((prev) =>
       prev.map((item) =>
-        item.id === itemId
-          ? { ...item, isChecked: !item.isChecked }
-          : item
-      )
+        item.id === itemId ? { ...item, isChecked: !item.isChecked } : item,
+      ),
     );
   };
 
   const handleIncrement = (itemId: number) => {
     setGroceries((prev) =>
       prev.map((item) =>
-        item.id === itemId
-          ? { ...item, count: item.count + 1 }
-          : item
-      )
+        item.id === itemId ? { ...item, count: item.count + 1 } : item,
+      ),
     );
   };
 
@@ -101,8 +97,8 @@ export default function GroceriesPage() {
       prev.map((item) =>
         item.id === itemId
           ? { ...item, count: Math.max(1, item.count - 1) }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -113,14 +109,11 @@ export default function GroceriesPage() {
       prev.map((item) =>
         item.id === itemId
           ? {
-            ...item,
-            count:
-              Number.isNaN(parsed) || parsed < 1
-                ? 1
-                : parsed,
-          }
-          : item
-      )
+              ...item,
+              count: Number.isNaN(parsed) || parsed < 1 ? 1 : parsed,
+            }
+          : item,
+      ),
     );
   };
 
@@ -130,7 +123,7 @@ export default function GroceriesPage() {
 
   const selectedCount = useMemo(
     () => groceries.filter((item) => item.isChecked).length,
-    [groceries]
+    [groceries],
   );
 
   const hasSelectedItems = selectedCount > 0;
@@ -162,9 +155,10 @@ export default function GroceriesPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <View
-          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}></View>
+          style={{ flex: 1, padding: 24, backgroundColor: colors.background }}
+        ></View>
 
         <ScrollView
           contentContainerStyle={[
@@ -197,9 +191,7 @@ export default function GroceriesPage() {
               </View>
             </View>
           </View>
-
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
-
           // List of grocery items
           <View style={styles.list}>
             {groceries.map((item) => (
@@ -227,7 +219,12 @@ export default function GroceriesPage() {
               { id: "activity", label: "Activity", icon: "list" },
               { id: "chores", label: "Chores", icon: "checkbox" },
               { id: "expenses", label: "Expenses", icon: "receipt" },
-              { id: "groceries", label: "Groceries", icon: "cart", active: true },
+              {
+                id: "groceries",
+                label: "Groceries",
+                icon: "cart",
+                active: true,
+              },
             ]}
             householdId={householdId}
           />

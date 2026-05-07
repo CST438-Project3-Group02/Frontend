@@ -1,3 +1,4 @@
+import { updateProfile } from "@/api/profiles";
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
@@ -29,7 +30,6 @@ export default function SettingsPage() {
   const { user, profile, isProfileLoading, refetchProfile } = useAuthContext();
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
 
-
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -39,7 +39,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.name || "");
-      setAvatarUrl(profile.profile_pic_url || "");
+      setAvatarUrl(profile.profilePicUrl || "");
     }
   }, [profile]);
 
@@ -65,8 +65,16 @@ export default function SettingsPage() {
 
   const uploadProfilePicture = async (imageUri: string) => {
     try {
-      if (!user?.id) return;
+      if (!user?.id || !profile?.profileId) {
+        throw new Error(
+          `Missing user ID or profile ID: user=${user?.id}, profileId=${profile?.profileId}`,
+        );
+      }
 
+      console.log(
+        "Uploading profile picture for profile ID:",
+        profile.profileId,
+      );
       const response = await fetch(imageUri);
       const blob = await response.blob();
       const fileName = `profile-${Date.now()}.jpg`;
@@ -84,58 +92,76 @@ export default function SettingsPage() {
         data: { publicUrl },
       } = supabase.storage.from("profile-pictures").getPublicUrl(filePath);
 
-      // Update profile in database (create if doesn't exist)
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .upsert(
-          { id: user.id, profile_pic_url: publicUrl },
-          { onConflict: "id" },
-        );
+      console.log("Image uploaded to:", publicUrl);
+      console.log("Updating profile with picture URL and name:", {
+        profileId: profile.profileId,
+        name: profile.name || displayName,
+        profilePicUrl: publicUrl,
+      });
 
-      if (updateError) {
-        throw updateError;
-      }
+      // Update profile in Spring Boot backend
+      const updateResult = await updateProfile(profile.profileId, {
+        name: profile.name || displayName,
+        profilePicUrl: publicUrl,
+      });
+      console.log("Profile update result:", updateResult);
+
+      // Update UI immediately with new avatar
+      console.log("Updating avatar URL to:", publicUrl);
+      setAvatarUrl(publicUrl);
 
       // Refetch profile immediately to update everywhere
       if (refetchProfile) {
+        console.log("Refetching profile...");
         await refetchProfile();
+        console.log("Profile refetched");
       }
 
-      setAvatarUrl(publicUrl);
       Alert.alert("Success", "Profile picture updated!");
     } catch (error) {
       console.error("Error uploading profile picture:", error);
-      throw error;
+      Alert.alert("Error", "Failed to upload image: " + JSON.stringify(error));
+    } finally {
+      setIsLoadingImage(false);
     }
   };
 
   const handleSaveProfile = async () => {
-    if (!user?.id || !displayName.trim()) {
+    if (!profile?.profileId || !displayName.trim()) {
       Alert.alert("Error", "Please enter a display name");
       return;
     }
 
     setIsSaving(true);
     try {
-      // Use upsert to create or update profile
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, name: displayName }, { onConflict: "id" });
+      console.log("Saving profile with:", {
+        profileId: profile.profileId,
+        name: displayName,
+        profilePicUrl: avatarUrl,
+      });
 
-      if (error) {
-        throw error;
-      }
+      // Update profile in Spring Boot backend
+      const updateResult = await updateProfile(profile.profileId, {
+        name: displayName,
+        profilePicUrl: avatarUrl,
+      });
+      console.log("Profile update result:", updateResult);
 
       // Refetch profile immediately to update everywhere
       if (refetchProfile) {
+        console.log("Refetching profile...");
         await refetchProfile();
+        console.log("Profile refetched");
       }
 
       Alert.alert("Success", "Profile updated!");
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating profile:", error);
-      Alert.alert("Error", "Failed to update profile");
+      Alert.alert(
+        "Error",
+        "Failed to update profile: " + JSON.stringify(error),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -193,7 +219,7 @@ export default function SettingsPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <ScrollView
           style={{
             flex: 1,
@@ -230,7 +256,8 @@ export default function SettingsPage() {
                   <ActivityIndicator size="large" color={colors.primary} />
                 ) : avatarUrl ? (
                   <Image
-                    source={{ uri: avatarUrl }}
+                    key={avatarUrl} // Force re-render when avatarUrl changes
+                    source={{ uri: avatarUrl + "?t=" + Date.now() }}
                     style={{
                       width: 100,
                       height: 100,

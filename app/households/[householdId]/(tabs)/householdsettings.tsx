@@ -1,4 +1,8 @@
-import { deleteHousehold, getHouseholdWithProfiles, updateHousehold } from "@/api/households";
+import {
+    deleteHousehold,
+    getHouseholdWithProfiles,
+    updateHousehold,
+} from "@/api/households";
 import RightPanel from "@/components/dashboard/RightPanel";
 import InviteHouseholdButton from "@/components/households/InviteHouseholdButton";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -11,14 +15,14 @@ import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 
 export default function HouseholdSettings() {
@@ -32,14 +36,14 @@ export default function HouseholdSettings() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // Editable fields
-  const [householdName, setHouseholdName] = useState('');
-  const [rentCost, setRentCost] = useState('');
-  const [numOfBedrooms, setNumOfBedrooms] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zipCode, setZipCode] = useState('');
-  const [country, setCountry] = useState('');
+  const [householdName, setHouseholdName] = useState("");
+  const [rentCost, setRentCost] = useState("");
+  const [numOfBedrooms, setNumOfBedrooms] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [country, setCountry] = useState("");
 
   const isAdmin = (membership?.privs ?? 99) <= 2;
   const isOwner = membership?.privs === 1;
@@ -47,14 +51,14 @@ export default function HouseholdSettings() {
 
   useEffect(() => {
     if (household) {
-      setHouseholdName(household.householdName ?? '');
-      setRentCost(household.rentCost?.toString() ?? '');
-      setNumOfBedrooms(household.numOfBedrooms?.toString() ?? '');
-      setAddress(household.address ?? '');
-      setCity(household.city ?? '');
-      setState(household.state ?? '');
-      setZipCode(household.zipCode ?? '');
-      setCountry(household.country ?? '');
+      setHouseholdName(household.householdName ?? "");
+      setRentCost(household.rentCost?.toString() ?? "");
+      setNumOfBedrooms(household.numOfBedrooms?.toString() ?? "");
+      setAddress(household.address ?? "");
+      setCity(household.city ?? "");
+      setState(household.state ?? "");
+      setZipCode(household.zipCode ?? "");
+      setCountry(household.country ?? "");
     }
   }, [household]);
 
@@ -64,7 +68,7 @@ export default function HouseholdSettings() {
         const data = await getHouseholdWithProfiles(householdId);
         setMembers(data.profiles ?? []);
       } catch (error) {
-        console.error('Failed to fetch members', error);
+        console.error("Failed to fetch members", error);
       }
     };
     fetchMembers();
@@ -84,34 +88,40 @@ export default function HouseholdSettings() {
       });
       setHousehold(updated);
     } catch (error) {
-      console.error('Failed to save household', error);
+      console.error("Failed to save household", error);
     }
   };
 
   const onDiscard = () => {
     if (!household) return;
-    setHouseholdName(household.householdName ?? '');
-    setRentCost(household.rentCost?.toString() ?? '');
-    setNumOfBedrooms(household.numOfBedrooms?.toString() ?? '');
-    setAddress(household.address ?? '');
-    setCity(household.city ?? '');
-    setState(household.state ?? '');
-    setZipCode(household.zipCode ?? '');
-    setCountry(household.country ?? '');
+    setHouseholdName(household.householdName ?? "");
+    setRentCost(household.rentCost?.toString() ?? "");
+    setNumOfBedrooms(household.numOfBedrooms?.toString() ?? "");
+    setAddress(household.address ?? "");
+    setCity(household.city ?? "");
+    setState(household.state ?? "");
+    setZipCode(household.zipCode ?? "");
+    setCountry(household.country ?? "");
   };
 
   const onDelete = async () => {
     try {
       await deleteHousehold(householdId);
       setDeleteModalVisible(false);
-      router.replace('/households');
+      router.replace("/households");
     } catch (error) {
-      console.error('Failed to delete household', error);
+      console.error("Failed to delete household", error);
     }
   };
 
   return (
-    <View style={{ flex: 1, flexDirection: isMobile ? "column" : "row", backgroundColor: colors.background }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: isMobile ? "column" : "row",
+        backgroundColor: colors.background,
+      }}
+    >
       {!isMobile && (
         <Sidebar
           items={[
@@ -120,7 +130,12 @@ export default function HouseholdSettings() {
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
             { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "household", label: "My Household", icon: "home", active: true },
+            {
+              id: "household",
+              label: "My Household",
+              icon: "home",
+              active: true,
+            },
             { id: "settings", label: "Settings", icon: "settings" },
           ]}
           householdId={householdId}
@@ -129,14 +144,21 @@ export default function HouseholdSettings() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <ScrollView contentContainerStyle={styles.page}>
           <View style={styles.header}>
             <ThemedText style={styles.eyebrow}>HOUSEHOLD PROFILE</ThemedText>
             <View style={styles.titleRow}>
-              <ThemedText style={styles.title}>{householdName || 'Household'}</ThemedText>
-              <TouchableOpacity onPress={() => router.push('/households')} style={styles.backButton}>
-                <ThemedText style={styles.backButtonText}>View All Households</ThemedText>
+              <ThemedText style={styles.title}>
+                {householdName || "Household"}
+              </ThemedText>
+              <TouchableOpacity
+                onPress={() => router.push("/households")}
+                style={styles.backButton}
+              >
+                <ThemedText style={styles.backButtonText}>
+                  View All Households
+                </ThemedText>
               </TouchableOpacity>
             </View>
             <View style={styles.titleUnderline} />
@@ -145,7 +167,13 @@ export default function HouseholdSettings() {
           <View style={styles.content}>
             <View style={styles.mainColumn}>
               <SectionCard
-                icon={<FontAwesome6 name="house-chimney" size={18} color={colors.primary} />}
+                icon={
+                  <FontAwesome6
+                    name="house-chimney"
+                    size={18}
+                    color={colors.primary}
+                  />
+                }
                 title="General Information"
               >
                 <View style={styles.gridTwo}>
@@ -173,33 +201,73 @@ export default function HouseholdSettings() {
               </SectionCard>
 
               <SectionCard
-                icon={<Feather name="map-pin" size={22} color={colors.primary} />}
+                icon={
+                  <Feather name="map-pin" size={22} color={colors.primary} />
+                }
                 title="Address Details"
               >
                 <View style={styles.addressGrid}>
-                  <Field label="Street Address" value={address} onChangeText={setAddress} editable={canEdit} wide />
-                  <Field label="Zip Code" value={zipCode} onChangeText={setZipCode} editable={canEdit} />
-                  <Field label="City" value={city} onChangeText={setCity} editable={canEdit} />
-                  <Field label="State" value={state} onChangeText={setState} editable={canEdit} />
-                  <Field label="Country" value={country} onChangeText={setCountry} editable={canEdit} />
+                  <Field
+                    label="Street Address"
+                    value={address}
+                    onChangeText={setAddress}
+                    editable={canEdit}
+                    wide
+                  />
+                  <Field
+                    label="Zip Code"
+                    value={zipCode}
+                    onChangeText={setZipCode}
+                    editable={canEdit}
+                  />
+                  <Field
+                    label="City"
+                    value={city}
+                    onChangeText={setCity}
+                    editable={canEdit}
+                  />
+                  <Field
+                    label="State"
+                    value={state}
+                    onChangeText={setState}
+                    editable={canEdit}
+                  />
+                  <Field
+                    label="Country"
+                    value={country}
+                    onChangeText={setCountry}
+                    editable={canEdit}
+                  />
                 </View>
               </SectionCard>
 
               {canEdit && (
                 <View style={styles.actions}>
                   <TouchableOpacity style={styles.saveButton} onPress={onSave}>
-                    <ThemedText style={styles.saveButtonText}>Save Changes</ThemedText>
+                    <ThemedText style={styles.saveButtonText}>
+                      Save Changes
+                    </ThemedText>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.discardButton} onPress={onDiscard}>
-                    <ThemedText style={styles.discardButtonText}>Discard Edits</ThemedText>
+                  <TouchableOpacity
+                    style={styles.discardButton}
+                    onPress={onDiscard}
+                  >
+                    <ThemedText style={styles.discardButtonText}>
+                      Discard Edits
+                    </ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
 
               {isOwner && (
-                <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteModalVisible(true)}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => setDeleteModalVisible(true)}
+                >
                   <Feather name="trash-2" size={18} color={colors.danger} />
-                  <ThemedText style={styles.deleteText}>Delete Household</ThemedText>
+                  <ThemedText style={styles.deleteText}>
+                    Delete Household
+                  </ThemedText>
                 </TouchableOpacity>
               )}
             </View>
@@ -209,28 +277,32 @@ export default function HouseholdSettings() {
                 <View style={styles.membersHeader}>
                   <ThemedText style={styles.membersTitle}>Members</ThemedText>
                   <View style={styles.memberCountPill}>
-                    <ThemedText style={styles.memberCountText}>{members.length} Total</ThemedText>
+                    <ThemedText style={styles.memberCountText}>
+                      {members.length} Total
+                    </ThemedText>
                   </View>
                 </View>
 
                 {members.length === 0 ? (
                   <View style={styles.emptyMembersState}>
-                    <ThemedText style={styles.emptyMembersText}>No members yet.</ThemedText>
+                    <ThemedText style={styles.emptyMembersText}>
+                      No members yet.
+                    </ThemedText>
                   </View>
                 ) : (
                   <View style={styles.membersList}>
                     {members.map((member: any) => (
                       <View key={member.profileId} style={styles.memberRow}>
-                        <ThemedText style={styles.memberName}>{member.name}</ThemedText>
+                        <ThemedText style={styles.memberName}>
+                          {member.name}
+                        </ThemedText>
                       </View>
                     ))}
                   </View>
                 )}
               </View>
 
-              {isAdmin && (
-                <InviteHouseholdButton />
-              )}
+              {isAdmin && <InviteHouseholdButton />}
             </View>
           </View>
         </ScrollView>
@@ -262,12 +334,15 @@ export default function HouseholdSettings() {
           <View style={styles.modalCard}>
             <ThemedText style={styles.modalTitle}>Delete Household</ThemedText>
             <ThemedText style={styles.modalSubtitle}>
-              You are about to delete household{' '}
+              You are about to delete household{" "}
               <ThemedText style={styles.modalBold}>{householdName}</ThemedText>.
               Are you sure you want to do this? This action cannot be undone.
             </ThemedText>
             <View style={styles.modalActions}>
-              <Pressable style={styles.cancelButton} onPress={() => setDeleteModalVisible(false)}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setDeleteModalVisible(false)}
+              >
                 <ThemedText style={styles.cancelText}>Cancel</ThemedText>
               </Pressable>
               <Pressable style={styles.confirmDeleteButton} onPress={onDelete}>
@@ -281,7 +356,15 @@ export default function HouseholdSettings() {
   );
 }
 
-function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function SectionCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeader}>
@@ -294,25 +377,51 @@ function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: 
 }
 
 function Field({
-  label, value, onChangeText, editable = false, muted, hasChevron, hasCopy, wide, prefix,
+  label,
+  value,
+  onChangeText,
+  editable = false,
+  muted,
+  hasChevron,
+  hasCopy,
+  wide,
+  prefix,
 }: {
-  label: string; value: string; onChangeText?: (text: string) => void;
-  editable?: boolean; muted?: boolean; hasChevron?: boolean;
-  hasCopy?: boolean; wide?: boolean; prefix?: string;
+  label: string;
+  value: string;
+  onChangeText?: (text: string) => void;
+  editable?: boolean;
+  muted?: boolean;
+  hasChevron?: boolean;
+  hasCopy?: boolean;
+  wide?: boolean;
+  prefix?: string;
 }) {
   return (
     <View style={[styles.fieldWrap, wide && styles.fieldWide]}>
       <ThemedText style={styles.fieldLabel}>{label.toUpperCase()}</ThemedText>
-      <View style={[styles.inputBox, muted && styles.inputMuted, !editable && styles.inputReadOnly]}>
+      <View
+        style={[
+          styles.inputBox,
+          muted && styles.inputMuted,
+          !editable && styles.inputReadOnly,
+        ]}
+      >
         {prefix && <ThemedText style={styles.inputPrefix}>{prefix}</ThemedText>}
         <TextInput
           value={value}
           onChangeText={onChangeText}
           editable={editable}
-          style={[styles.inputText, muted && styles.inputTextMuted, !editable && styles.inputTextReadOnly]}
+          style={[
+            styles.inputText,
+            muted && styles.inputTextMuted,
+            !editable && styles.inputTextReadOnly,
+          ]}
           placeholderTextColor={colors.textMuted}
         />
-        {hasChevron && <Feather name="chevron-down" size={18} color={colors.textMuted} />}
+        {hasChevron && (
+          <Feather name="chevron-down" size={18} color={colors.textMuted} />
+        )}
         {hasCopy && <Feather name="copy" size={14} color={colors.borderSoft} />}
       </View>
     </View>
@@ -611,13 +720,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -628,7 +737,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.primary,
   },
 });

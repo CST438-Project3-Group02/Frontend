@@ -1,6 +1,21 @@
+import {
+  getActivityReactions,
+  getHouseholdPosts,
+  likePost,
+  unlikePost,
+} from "@/api/posts";
 import { colors } from "@/constants/colors";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ThemedText } from "../themed-text";
 
 export interface FeedPost {
@@ -14,43 +29,54 @@ export interface FeedPost {
   comments?: number;
   shares?: number;
   tags?: string[];
+  liked?: boolean;
+  userReactionId?: string; // ID of user's like reaction (if liked)
 }
 
 interface FeedListProps {
+  householdId: string;
   posts?: FeedPost[];
   onPostPress?: (id: string) => void;
   onLike?: (id: string) => void;
   isLoading?: boolean;
+  refreshTrigger?: number;
+  useMockData?: boolean;
 }
-
-const MOCK_POSTS: FeedPost[] = [
-  {
-    id: "1",
-    author: "Dr. Clinkenbeard",
-    content: "give me an A",
-    timestamp: "3h ago",
-    likes: 5,
-    comments: 1,
-    tags: ["Expenses"],
-  },
-  {
-    id: "2",
-    author: "Kristopher Church",
-    content: "Is Lebron the goat",
-    timestamp: "5h ago",
-    likes: 8,
-    comments: 2,
-    tags: ["Groceries", "Needed"],
-  },
-];
 
 function FeedPostCard({
   post,
   onLike,
+  profileId,
 }: {
   post: FeedPost;
-  onLike?: (id: string) => void;
+  onLike?: (id: string, liked: boolean) => void;
+  profileId?: string;
 }) {
+  const [liked, setLiked] = useState(post.liked || false);
+  const [likes, setLikes] = useState(post.likes || 0);
+  const [userReactionId, setUserReactionId] = useState(post.userReactionId);
+
+  const handleLike = async () => {
+    try {
+      if (liked && userReactionId) {
+        await unlikePost(userReactionId);
+        setLikes((prev) => Math.max(0, prev - 1));
+        setUserReactionId(undefined);
+      } else {
+        const response = await likePost(post.id, profileId || "");
+        setLikes((prev) => prev + 1);
+        // Store the reaction ID returned from the API
+        if (response?.id) {
+          setUserReactionId(response.id);
+        }
+      }
+      setLiked(!liked);
+      onLike?.(post.id, !liked);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      Alert.alert("Error", "Failed to update like");
+    }
+  };
   return (
     <View
       style={{
@@ -181,20 +207,22 @@ function FeedPostCard({
         }}
       >
         <TouchableOpacity
-          onPress={() => onLike?.(post.id)}
+          onPress={handleLike}
           style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
         >
-          <Ionicons name="heart-outline" size={18} color={colors.primary} />
-          {post.likes !== undefined && (
-            <ThemedText
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-              }}
-            >
-              {post.likes}
-            </ThemedText>
-          )}
+          <Ionicons
+            name={liked ? "heart" : "heart-outline"}
+            size={18}
+            color={liked ? "#e74c3c" : colors.primary}
+          />
+          <ThemedText
+            style={{
+              fontSize: 14,
+              color: colors.textMuted,
+            }}
+          >
+            {likes}
+          </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
@@ -241,11 +269,136 @@ function FeedPostCard({
 }
 
 export default function FeedList({
-  posts = MOCK_POSTS,
+  householdId,
+  posts: initialPosts,
   onPostPress,
-  onLike,
-  isLoading,
+  isLoading: externalIsLoading,
+  refreshTrigger,
+  useMockData = false,
 }: FeedListProps) {
+  const [posts, setPosts] = useState<FeedPost[]>(initialPosts || []);
+  const [isLoading, setIsLoading] = useState(true);
+  const { profile } = useAuthContext();
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (!householdId) return;
+
+      setIsLoading(true);
+      try {
+        console.log("Fetching posts for household:", householdId);
+        const fetchedPosts = await getHouseholdPosts(householdId);
+        console.log("Fetched posts:", fetchedPosts);
+
+        if (Array.isArray(fetchedPosts) && fetchedPosts.length > 0) {
+          // Fetch reactions for each post to check if user has liked it
+          const postsWithReactions = await Promise.all(
+            fetchedPosts.map(async (post) => {
+              try {
+                const reactions = await getActivityReactions(post.id);
+                // Find if current user has a like reaction
+                const userLike = Array.isArray(reactions)
+                  ? reactions.find(
+                      (r) =>
+                        r.profileId === profile?.id ||
+                        r.profileId === profile?.profileId,
+                    )
+                  : null;
+
+                return {
+                  ...post,
+                  liked: !!userLike,
+                  userReactionId: userLike?.id,
+                };
+              } catch (error) {
+                console.error(
+                  `Error fetching reactions for post ${post.id}:`,
+                  error,
+                );
+                return post;
+              }
+            }),
+          );
+          setPosts(postsWithReactions);
+        } else {
+          console.log("No posts returned from API, using empty array");
+          setPosts([]);
+        }
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        // Fallback to empty array on error
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [
+    householdId,
+    refreshTrigger,
+    useMockData,
+    profile?.id,
+    profile?.profileId,
+  ]);
+
+  const handleLike = async (postId: string, liked: boolean) => {
+    // Update local state
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === postId ? { ...post, liked } : post)),
+    );
+  };
+
+  if (externalIsLoading || isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 16,
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <ScrollView
+        style={{
+          flex: 1,
+          padding: 16,
+        }}
+      >
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 40,
+          }}
+        >
+          <Ionicons
+            name="chatbubbles-outline"
+            size={48}
+            color={colors.textMuted}
+          />
+          <ThemedText
+            style={{
+              fontSize: 16,
+              color: colors.textMuted,
+              marginTop: 12,
+              textAlign: "center",
+            }}
+          >
+            No posts yet. Be the first to share something!
+          </ThemedText>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView
       style={{
@@ -255,7 +408,11 @@ export default function FeedList({
     >
       {posts.map((post) => (
         <TouchableOpacity key={post.id} onPress={() => onPostPress?.(post.id)}>
-          <FeedPostCard post={post} onLike={onLike} />
+          <FeedPostCard
+            post={post}
+            onLike={handleLike}
+            profileId={profile?.profileId?.toString()}
+          />
         </TouchableOpacity>
       ))}
     </ScrollView>

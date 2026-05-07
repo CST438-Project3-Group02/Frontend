@@ -1,3 +1,4 @@
+import { getHouseholdWithProfiles } from "@/api/households";
 import RightPanel from "@/components/dashboard/RightPanel";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
@@ -6,7 +7,6 @@ import { ThemedText } from "@/components/themed-text";
 import { colors } from "@/constants/colors";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { useChat } from "@/hooks/use-chat";
-import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -46,7 +46,9 @@ export default function ChatPage() {
   const [activeTab, setActiveTab] = useState<Tab>("household");
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [otherProfiles, setOtherProfiles] = useState<any[]>([]);
+  const [householdMembers, setHouseholdMembers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showMemberList, setShowMemberList] = useState(false);
 
   // Initialize household chat on mount
   useEffect(() => {
@@ -65,25 +67,25 @@ export default function ChatPage() {
     fetchConversations(user.id);
   }, [user?.id]);
 
-  // Fetch other household members for 1-on-1 chats
+  // Fetch household members (not all users)
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !householdId) return;
 
-    const fetchOtherMembers = async () => {
+    const fetchHouseholdMembers = async () => {
       try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .neq("id", user.id);
-
-        setOtherProfiles(data || []);
+        const members = await getHouseholdWithProfiles(householdId);
+        // Filter out current user
+        const otherMembers = members.filter(
+          (profile: any) => profile.id !== user.id,
+        );
+        setHouseholdMembers(otherMembers);
       } catch (error) {
-        console.error("Error fetching members:", error);
+        console.error("Error fetching household members:", error);
       }
     };
 
-    fetchOtherMembers();
-  }, [user?.id]);
+    fetchHouseholdMembers();
+  }, [user?.id, householdId]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !user?.id || !currentConversationId) {
@@ -223,7 +225,7 @@ export default function ChatPage() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
 
         <View style={{ flex: 1, flexDirection: "row" }}>
           {/* Conversations List */}
@@ -299,161 +301,444 @@ export default function ChatPage() {
 
               {/* Members list for Direct messages */}
               {activeTab === "direct" && (
-                <ScrollView
-                  style={{
-                    flex: 1,
-                    paddingHorizontal: 12,
-                  }}
-                >
-                  {otherProfiles.map((profile) => (
-                    <TouchableOpacity
-                      key={profile.id}
-                      onPress={() => handle1on1Chat(profile.id)}
+                <View style={{ flex: 1, flexDirection: "column" }}>
+                  {/* Search Bar */}
+                  <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
+                    <View
                       style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        paddingVertical: 12,
-                        paddingHorizontal: 8,
-                        borderRadius: 8,
                         backgroundColor: colors.surfaceSoft,
-                        marginBottom: 8,
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        gap: 8,
                       }}
                     >
-                      {profile.profile_pic_url ? (
-                        <Image
-                          source={{ uri: profile.profile_pic_url }}
-                          style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 20,
-                            marginRight: 12,
+                      <Ionicons
+                        name="search"
+                        size={18}
+                        color={colors.textMuted}
+                      />
+                      <TextInput
+                        style={{
+                          flex: 1,
+                          paddingVertical: 8,
+                          color: colors.text,
+                          fontSize: 14,
+                        }}
+                        placeholder="Search members..."
+                        placeholderTextColor={colors.textMuted}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                      />
+                    </View>
+                  </View>
+
+                  {/* Members List */}
+                  <ScrollView style={{ flex: 1, paddingHorizontal: 12 }}>
+                    {householdMembers
+                      .filter((profile) =>
+                        profile.name
+                          ?.toLowerCase()
+                          .includes(searchQuery.toLowerCase()),
+                      )
+                      .map((profile) => (
+                        <TouchableOpacity
+                          key={profile.id}
+                          onPress={() => {
+                            handle1on1Chat(profile.id);
+                            setSearchQuery("");
                           }}
-                        />
-                      ) : (
-                        <View
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 20,
-                            backgroundColor: colors.primary,
-                            justifyContent: "center",
+                            flexDirection: "row",
                             alignItems: "center",
-                            marginRight: 12,
+                            paddingVertical: 12,
+                            paddingHorizontal: 8,
+                            borderRadius: 8,
+                            backgroundColor: colors.surfaceSoft,
+                            marginBottom: 8,
                           }}
                         >
+                          {profile.profilePicUrl ? (
+                            <Image
+                              source={{ uri: profile.profilePicUrl }}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                marginRight: 12,
+                              }}
+                            />
+                          ) : (
+                            <View
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: colors.primary,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginRight: 12,
+                              }}
+                            >
+                              <ThemedText
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: "bold",
+                                  color: "white",
+                                }}
+                              >
+                                {profile.name?.charAt(0).toUpperCase() || "?"}
+                              </ThemedText>
+                            </View>
+                          )}
                           <ThemedText
-                            style={{ fontSize: 14, fontWeight: "bold" }}
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "500",
+                              color: colors.text,
+                            }}
                           >
-                            {profile.name?.charAt(0).toUpperCase() || "?"}
+                            {profile.name || "Unknown"}
                           </ThemedText>
-                        </View>
-                      )}
-                      <ThemedText
+                        </TouchableOpacity>
+                      ))}
+                    {householdMembers.filter((profile) =>
+                      profile.name
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                    ).length === 0 && (
+                      <View
                         style={{
-                          fontSize: 14,
-                          fontWeight: "500",
-                          color: colors.text,
+                          alignItems: "center",
+                          paddingVertical: 24,
                         }}
                       >
-                        {profile.name || "Unknown"}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                        <ThemedText
+                          style={{
+                            fontSize: 14,
+                            color: colors.textMuted,
+                          }}
+                        >
+                          {searchQuery
+                            ? "No members found"
+                            : "No other members in household"}
+                        </ThemedText>
+                      </View>
+                    )}
+                  </ScrollView>
+                </View>
               )}
             </View>
           )}
 
           {/* Chat Area */}
           <View style={{ flex: 1, flexDirection: "column" }}>
-            {/* Messages */}
-            <FlatList
-              data={messages}
-              renderItem={renderMessage}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={{
-                paddingVertical: 16,
-              }}
-              ListEmptyComponent={
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingHorizontal: 16,
-                  }}
-                >
-                  <Ionicons
-                    name="chatbubble-outline"
-                    size={48}
-                    color={colors.textMuted}
-                  />
-                  <ThemedText
-                    style={{
-                      fontSize: 16,
-                      color: colors.textMuted,
-                      marginTop: 12,
-                      textAlign: "center",
-                    }}
-                  >
-                    No messages yet. Start a conversation!
-                  </ThemedText>
-                </View>
-              }
-              ListFooterComponent={
-                isLoading ? <ActivityIndicator size="large" /> : null
-              }
-            />
-
-            {/* Message Input */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                padding: 16,
-                borderTopWidth: 1,
-                borderTopColor: colors.borderSoft,
-                backgroundColor: colors.surface,
-              }}
-            >
-              <TextInput
-                placeholder="Type a message..."
-                placeholderTextColor={colors.textMuted}
-                value={messageText}
-                onChangeText={setMessageText}
+            {/* Mobile Tab Selector */}
+            {isMobile && (
+              <View
                 style={{
-                  flex: 1,
-                  borderRadius: 8,
-                  backgroundColor: colors.surfaceSoft,
+                  flexDirection: "row",
                   paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  color: colors.text,
-                  maxHeight: 100,
-                }}
-                multiline
-              />
-              <TouchableOpacity
-                onPress={handleSendMessage}
-                disabled={isSending || !messageText.trim()}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 8,
-                  backgroundColor: messageText.trim()
-                    ? colors.primary
-                    : colors.surfaceSoft,
-                  justifyContent: "center",
-                  alignItems: "center",
+                  paddingVertical: 12,
+                  gap: 8,
+                  backgroundColor: colors.surface,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.borderSoft,
                 }}
               >
-                {isSending ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <Ionicons name="send" size={20} color="white" />
-                )}
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setActiveTab("household");
+                    setShowMemberList(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: 8,
+                    backgroundColor:
+                      activeTab === "household"
+                        ? colors.primary
+                        : colors.surfaceSoft,
+                  }}
+                >
+                  <ThemedText
+                    style={{
+                      textAlign: "center",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: activeTab === "household" ? "white" : colors.text,
+                    }}
+                  >
+                    Household
+                  </ThemedText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setActiveTab("direct")}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: 8,
+                    backgroundColor:
+                      activeTab === "direct"
+                        ? colors.primary
+                        : colors.surfaceSoft,
+                  }}
+                >
+                  <ThemedText
+                    style={{
+                      textAlign: "center",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: activeTab === "direct" ? "white" : colors.text,
+                    }}
+                  >
+                    Direct
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Mobile Member List View */}
+            {isMobile && activeTab === "direct" && showMemberList ? (
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.surface,
+                  flexDirection: "column",
+                }}
+              >
+                {/* Back Button */}
+                <View
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.borderSoft,
+                  }}
+                >
+                  <TouchableOpacity onPress={() => setShowMemberList(false)}>
+                    <Ionicons
+                      name="arrow-back"
+                      size={24}
+                      color={colors.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Search Bar */}
+                <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: colors.surfaceSoft,
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      gap: 8,
+                    }}
+                  >
+                    <Ionicons
+                      name="search"
+                      size={18}
+                      color={colors.textMuted}
+                    />
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        color: colors.text,
+                        fontSize: 14,
+                      }}
+                      placeholder="Search members..."
+                      placeholderTextColor={colors.textMuted}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                    />
+                  </View>
+                </View>
+
+                {/* Members List */}
+                <ScrollView style={{ flex: 1, paddingHorizontal: 12 }}>
+                  {householdMembers
+                    .filter((profile) =>
+                      profile.name
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                    )
+                    .map((profile) => (
+                      <TouchableOpacity
+                        key={profile.id}
+                        onPress={() => {
+                          handle1on1Chat(profile.id);
+                          setSearchQuery("");
+                          setShowMemberList(false);
+                        }}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          paddingVertical: 12,
+                          paddingHorizontal: 8,
+                          borderRadius: 8,
+                          backgroundColor: colors.surfaceSoft,
+                          marginBottom: 8,
+                        }}
+                      >
+                        {profile.profilePicUrl ? (
+                          <Image
+                            source={{ uri: profile.profilePicUrl }}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 20,
+                              marginRight: 12,
+                            }}
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 20,
+                              backgroundColor: colors.primary,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              marginRight: 12,
+                            }}
+                          >
+                            <ThemedText
+                              style={{
+                                fontSize: 14,
+                                fontWeight: "bold",
+                                color: "white",
+                              }}
+                            >
+                              {profile.name?.charAt(0).toUpperCase() || "?"}
+                            </ThemedText>
+                          </View>
+                        )}
+                        <ThemedText
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "500",
+                            color: colors.text,
+                          }}
+                        >
+                          {profile.name || "Unknown"}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    ))}
+                </ScrollView>
+              </View>
+            ) : (
+              <>
+                {/* Messages */}
+                <FlatList
+                  data={messages}
+                  renderItem={renderMessage}
+                  keyExtractor={(item) => item.id}
+                  contentContainerStyle={{
+                    paddingVertical: 16,
+                  }}
+                  ListEmptyComponent={
+                    <View
+                      style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        paddingHorizontal: 16,
+                      }}
+                    >
+                      <Ionicons
+                        name="chatbubble-outline"
+                        size={48}
+                        color={colors.textMuted}
+                      />
+                      <ThemedText
+                        style={{
+                          fontSize: 16,
+                          color: colors.textMuted,
+                          marginTop: 12,
+                          textAlign: "center",
+                        }}
+                      >
+                        No messages yet. Start a conversation!
+                      </ThemedText>
+                    </View>
+                  }
+                  ListFooterComponent={
+                    isLoading ? <ActivityIndicator size="large" /> : null
+                  }
+                />
+
+                {/* Message Input */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "flex-end",
+                    gap: 8,
+                    padding: 16,
+                    borderTopWidth: 1,
+                    borderTopColor: colors.borderSoft,
+                    backgroundColor: colors.surface,
+                  }}
+                >
+                  {isMobile && activeTab === "direct" && (
+                    <TouchableOpacity
+                      onPress={() => setShowMemberList(true)}
+                      style={{
+                        padding: 8,
+                      }}
+                    >
+                      <Ionicons
+                        name="person-add"
+                        size={24}
+                        color={colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  <TextInput
+                    placeholder="Type a message..."
+                    placeholderTextColor={colors.textMuted}
+                    value={messageText}
+                    onChangeText={setMessageText}
+                    style={{
+                      flex: 1,
+                      borderRadius: 8,
+                      backgroundColor: colors.surfaceSoft,
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      color: colors.text,
+                      maxHeight: 100,
+                    }}
+                    multiline
+                  />
+                  <TouchableOpacity
+                    onPress={handleSendMessage}
+                    disabled={isSending || !messageText.trim()}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 8,
+                      backgroundColor: messageText.trim()
+                        ? colors.primary
+                        : colors.surfaceSoft,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {isSending ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Ionicons name="send" size={20} color="white" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </View>
         </View>
 

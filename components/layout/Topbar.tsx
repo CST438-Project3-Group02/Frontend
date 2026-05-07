@@ -9,9 +9,14 @@ import { ThemedText } from "../themed-text";
 interface TopbarProps {
   onSearch?: (query: string) => void;
   userName?: string;
+  householdId?: string;
 }
 
-export default function Topbar({ onSearch, userName }: TopbarProps) {
+export default function Topbar({
+  onSearch,
+  userName,
+  householdId,
+}: TopbarProps) {
   const insets = useSafeAreaInsets();
   const { profile, user } = useAuthContext();
   const router = useRouter();
@@ -22,10 +27,15 @@ export default function Topbar({ onSearch, userName }: TopbarProps) {
     user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
     "User";
-  const avatarUrl = profile?.profile_pic_url;
+  const avatarUrl = profile?.profilePicUrl;
 
   const handleProfilePress = () => {
-    router.push("/settings");
+    if (householdId) {
+      router.push({
+        pathname: "/households/[householdId]/settings",
+        params: { householdId },
+      });
+    }
   };
 
   return (

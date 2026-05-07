@@ -1,11 +1,13 @@
 import Greeting from "@/components/dashboard/Greeting";
 import RightPanel from "@/components/dashboard/RightPanel";
+import ComposerCard from "@/components/feed/ComposerCard";
 import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import { View, useWindowDimensions } from "react-native";
 
 export default function Index() {
@@ -13,6 +15,11 @@ export default function Index() {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handlePostCreated = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   return (
     <View
@@ -39,10 +46,23 @@ export default function Index() {
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Topbar householdId={householdId} />
         <Greeting />
-        <FeedList />
-        {isMobile && (
+        {householdId && (
+          <>
+            <View style={{ paddingHorizontal: 16 }}>
+              <ComposerCard
+                householdId={householdId}
+                onPostCreated={handlePostCreated}
+              />
+            </View>
+            <FeedList
+              householdId={householdId}
+              refreshTrigger={refreshTrigger}
+            />
+          </>
+        )}
+        {isMobile && householdId && (
           <BottomNavigation
             items={[
               { id: "activity", label: "Activity", icon: "list", active: true },
