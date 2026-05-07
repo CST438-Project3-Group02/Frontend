@@ -1,3 +1,11 @@
+import {
+  createGroceryItem,
+  createGroceryList,
+  deleteGroceryItem,
+  getFullGroceryListsByHousehold,
+  updateGroceryItem,
+} from "@/api/groceries";
+
 import RightPanel from "@/components/dashboard/RightPanel";
 import ItemCard from "@/components/groceries/ItemCard";
 import SearchBar from "@/components/groceries/SearchBar";
@@ -5,7 +13,8 @@ import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import {
   Pressable,
   ScrollView,
@@ -16,56 +25,63 @@ import {
 } from "react-native";
 
 type GroceryItem = {
-  id: number;
-  name: string;
-  count: number;
-  addedBy: string;
-  isUrgent: boolean;
-  isChecked: boolean;
+  groceryItemId: number;
+  itemName: string;
+  purchased: boolean;
 };
 
-const initialGroceries: GroceryItem[] = [
-  {
-    id: 1,
-    name: "Milk",
-    count: 2,
-    addedBy: "Maya",
-    isUrgent: true,
-    isChecked: false,
-  },
-  {
-    id: 2,
-    name: "Bread",
-    count: 1,
-    addedBy: "Alex",
-    isUrgent: false,
-    isChecked: false,
-  },
-  {
-    id: 3,
-    name: "Eggs",
-    count: 12,
-    addedBy: "Jordan",
-    isUrgent: false,
-    isChecked: true,
-  },
-  {
-    id: 4,
-    name: "Cheese",
-    count: 1,
-    addedBy: "Chris",
-    isUrgent: false,
-    isChecked: false,
-  },
-  {
-    id: 5,
-    name: "Fruits",
-    count: 5,
-    addedBy: "Taylor",
-    isUrgent: true,
-    isChecked: false,
-  },
-];
+type GroceryList = {
+  groceryListId: number;
+  listName: string;
+  profileId?: number;
+  profileName?: string;
+  householdId?: number;
+  householdName?: string;
+  groceryItems?: GroceryItem[];
+};
+
+// const initialGroceries: GroceryItem[] = [
+//   {
+//     id: 1,
+//     name: "Milk",
+//     count: 2,
+//     addedBy: "Maya",
+//     isUrgent: true,
+//     isChecked: false,
+//   },
+//   {
+//     id: 2,
+//     name: "Bread",
+//     count: 1,
+//     addedBy: "Alex",
+//     isUrgent: false,
+//     isChecked: false,
+//   },
+//   {
+//     id: 3,
+//     name: "Eggs",
+//     count: 12,
+//     addedBy: "Jordan",
+//     isUrgent: false,
+//     isChecked: true,
+//   },
+//   {
+//     id: 4,
+//     name: "Cheese",
+//     count: 1,
+//     addedBy: "Chris",
+//     isUrgent: false,
+//     isChecked: false,
+//   },
+//   {
+//     id: 5,
+//     name: "Fruits",
+//     count: 5,
+//     addedBy: "Taylor",
+//     isUrgent: true,
+//     isChecked: false,
+//   },
+// ];
 
 export default function GroceriesPage() {
   const router = useRouter();
@@ -73,64 +89,162 @@ export default function GroceriesPage() {
   const isMobile = width < 768;
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
 
-  const [groceries, setGroceries] = useState<GroceryItem[]>(initialGroceries);
+  const [groceryListId, setGroceryListId] = useState<number | null>(null);
+  const [groceries, setGroceries] = useState<GroceryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { profile } = useAuthContext();
+  const profileId = profile?.profileId;
 
-  const handleToggleItem = (itemId: number) => {
-    setGroceries((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? { ...item, isChecked: !item.isChecked }
-          : item
-      )
-    );
-  };
+  async function refreshGroceries() {
+    if (!householdId) return;
 
-  const handleIncrement = (itemId: number) => {
-    setGroceries((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? { ...item, count: item.count + 1 }
-          : item
-      )
-    );
-  };
+    try {
+      setLoading(true);
 
-  const handleDecrement = (itemId: number) => {
-    setGroceries((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? { ...item, count: Math.max(1, item.count - 1) }
-          : item
-      )
-    );
-  };
+      const lists: GroceryList[] = await getFullGroceryListsByHousehold(
+        householdId
+      );
 
-  const handleCountChange = (itemId: number, value: string) => {
+      let list = lists?.[0];
+
+      // CHANGE: create default list if household has none
+      if (!list) {
+        list = await createGroceryList({
+          listName: "Household Groceries",
+          profileId,
+          householdId: Number(householdId),
+        });
+      }
+
+      setGroceryListId(list.groceryListId);
+      setGroceries(list.groceryItems ?? []);
+    } catch (err) {
+      console.error("Failed to load groceries", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    refreshGroceries();
+  }, [householdId]);
+
+  async function handleAddItem(text: string) {
+    if (!text.trim() || !groceryListId) return;
+
+    try {
+      await createGroceryItem({
+        itemName: text.trim(),
+        isPurchased: false,
+        profileId,
+        groceryListId,
+      });
+
+      refreshGroceries();
+    } catch (err) {
+      console.error("Failed to add grocery item", err);
+    }
+  }
+
+
+  async function handleToggleItem(item: GroceryItem) {
+    try {
+      await updateGroceryItem(item.groceryItemId, {
+        ...item,
+        isPurchased: !item.purchased,
+      });
+
+      setGroceries((prev) =>
+        prev.map((grocery) =>
+          grocery.groceryItemId === item.groceryItemId
+            ? { ...grocery, purchased: !grocery.purchased }
+            : grocery
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update grocery item", err);
+    }
+  }
+
+  async function handleIncrement(item: GroceryItem) {
+    const nextQuantity = item.quantity + 1;
+
+    try {
+      await updateGroceryItem(item.groceryItemId, {
+        ...item,
+        quantity: nextQuantity,
+      });
+
+      setGroceries((prev) =>
+        prev.map((grocery) =>
+          grocery.groceryItemId === item.groceryItemId
+            ? { ...grocery, quantity: nextQuantity }
+            : grocery
+        )
+      );
+    } catch (err) {
+      console.error("Failed to increment grocery item", err);
+    }
+  }
+
+  async function handleDecrement(item: GroceryItem) {
+    const nextQuantity = Math.max(1, item.quantity - 1);
+
+    try {
+      await updateGroceryItem(item.groceryItemId, {
+        ...item,
+        quantity: nextQuantity,
+      });
+
+      setGroceries((prev) =>
+        prev.map((grocery) =>
+          grocery.groceryItemId === item.groceryItemId
+            ? { ...grocery, quantity: nextQuantity }
+            : grocery
+        )
+      );
+    } catch (err) {
+      console.error("Failed to decrement grocery item", err);
+    }
+  }
+
+  async function handleCountChange(item: GroceryItem, value: string) {
     const parsed = parseInt(value, 10);
+    const nextQuantity = Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
 
-    setGroceries((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? {
-            ...item,
-            count:
-              Number.isNaN(parsed) || parsed < 1
-                ? 1
-                : parsed,
-          }
-          : item
-      )
-    );
-  };
+    try {
+      await updateGroceryItem(item.groceryItemId, {
+        ...item,
+        quantity: nextQuantity,
+      });
 
-  const handleDeleteSelected = () => {
-    setGroceries((prev) => prev.filter((item) => !item.isChecked));
-  };
+      setGroceries((prev) =>
+        prev.map((grocery) =>
+          grocery.groceryItemId === item.groceryItemId
+            ? { ...grocery, quantity: nextQuantity }
+            : grocery
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update grocery quantity", err);
+    }
+  }
 
-  const selectedCount = useMemo(
-    () => groceries.filter((item) => item.isChecked).length,
-    [groceries]
-  );
+  async function handleDeleteSelected() {
+    const selectedItems = groceries.filter((item) => item.purchased);
+
+    try {
+      await Promise.all(
+        selectedItems.map((item) => deleteGroceryItem(item.groceryItemId))
+      );
+
+      setGroceries((prev) => prev.filter((item) => !item.isPurchased));
+    } catch (err) {
+      console.error("Failed to delete selected grocery items", err);
+    }
+  }
+
+  const selectedCount = groceries.filter(item => item.purchased).length;
 
   const hasSelectedItems = selectedCount > 0;
 
@@ -192,27 +306,32 @@ export default function GroceriesPage() {
               </View>
             </View>
           </View>
-
-          <SearchBar onAdd={(text) => console.log("Add item:", text)} />
+          {/* Using SearchBar adds grocery item */}
+          <SearchBar onAdd={handleAddItem} />
 
           {/*  List of grocery items */}
           <View style={styles.list}>
-            {groceries.map((item) => (
-              <View key={item.id} style={styles.cardWrapper}>
-                <ItemCard
-                  name={item.name}
-                  count={item.count}
-                  addedBy={item.addedBy}
-                  avatarUrl={`https://i.pravatar.cc/150?u=${item.id}`}
-                  isUrgent={item.isUrgent}
-                  isChecked={item.isChecked}
-                  onToggle={() => handleToggleItem(item.id)}
-                  onIncrement={() => handleIncrement(item.id)}
-                  onDecrement={() => handleDecrement(item.id)}
-                  onCountChange={(value) => handleCountChange(item.id, value)}
-                />
-              </View>
-            ))}
+            {loading ? (
+              <Text style={styles.emptyText}>Loading groceries...</Text>
+            ) : groceries.length === 0 ? (
+              <Text style={styles.emptyText}>
+                No grocery items yet. Add one above.
+              </Text>
+            ) : (
+              groceries.map((item) => (
+                <View key={item.groceryItemId} style={styles.cardWrapper}>
+                  <ItemCard
+                    name={item.itemName}
+                    count={1} // ❗ no quantity exists yet
+                    addedBy="You" // ❗ no profile info returned
+                    avatarUrl={`https://i.pravatar.cc/150?u=${item.groceryItemId}`}
+                    isUrgent={false} // ❗ not in backend
+                    isChecked={item.purchased}
+                    onToggle={() => handleToggleItem(item)}
+                  />
+                </View>
+              ))
+            )}
           </View>
         </ScrollView>
 
@@ -303,5 +422,10 @@ const styles = StyleSheet.create({
 
   cardWrapper: {
     marginBottom: 12,
+  },
+  emptyText: {
+    color: "#71717a",
+    fontSize: 14,
+    marginTop: 16,
   },
 });
