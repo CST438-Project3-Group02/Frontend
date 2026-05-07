@@ -1,8 +1,8 @@
+import Greeting from "@/components/dashboard/Greeting";
 import RightPanel from "@/components/dashboard/RightPanel";
 import FeedList from "@/components/feed/FeedList";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, useWindowDimensions } from "react-native";
@@ -28,17 +28,14 @@ export default function Index() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart" },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "households", label: "Households", icon: "home" },
-            { id: "settings", label: "Settings", icon: "settings" },
+            { id: "household", label: "My Household", icon: "home" },
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
+        <Greeting />
         <FeedList />
         {isMobile && (
           <BottomNavigation

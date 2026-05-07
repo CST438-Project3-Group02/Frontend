@@ -3,7 +3,6 @@ import ItemCard from "@/components/groceries/ItemCard";
 import SearchBar from "@/components/groceries/SearchBar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { colors } from "@/constants/colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -152,17 +151,13 @@ export default function GroceriesPage() {
             { id: "chores", label: "Chores", icon: "checkbox" },
             { id: "expenses", label: "Expenses", icon: "receipt" },
             { id: "groceries", label: "Groceries", icon: "cart", active: true },
-            { id: "chat", label: "Chat", icon: "chatbubble" },
-            { id: "households", label: "Households", icon: "home" },
-            { id: "settings", label: "Settings", icon: "settings" },
+            { id: "household", label: "My Household", icon: "home" },
           ]}
           householdId={householdId}
-          onRoomiePress={() => router.push("/")}
         />
       )}
 
       <View style={{ flex: 1, flexDirection: "column" }}>
-        <Topbar />
         <View
           style={{ flex: 1, padding: 24, backgroundColor: colors.background }}></View>
 
@@ -173,7 +168,7 @@ export default function GroceriesPage() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          // Header with title, subtitle, and delete button
+          {/* Header with title, subtitle, and delete button */}
           <View style={styles.headerBlock}>
             <View style={styles.headerTopRow}>
               <View style={styles.headerTextContainer}>
@@ -200,7 +195,7 @@ export default function GroceriesPage() {
 
           <SearchBar onAdd={(text) => console.log("Add item:", text)} />
 
-          // List of grocery items
+          {/*  List of grocery items */}
           <View style={styles.list}>
             {groceries.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>

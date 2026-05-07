@@ -6,8 +6,13 @@ export function getHouseholdsByProfile(profileId: number) {
 }
 
 // Get a household
-export function getHousehold(householdId: number) {
+export function getHousehold(householdId: number | string) {
   return request(`/api/households/${householdId}`);
+}
+
+// Get all profiles for a household
+export function getHouseholdWithProfiles(householdId: number | string) {
+  return request(`/api/households/${householdId}/profiles`);
 }
 
 // Creating a household
@@ -29,7 +34,10 @@ export async function createHousehold(profileId: number, payload: any) {
 }
 
 // Joining a household
-export async function joinHousehold(profileId: number, householdId: number) {
+export async function joinHousehold(
+  profileId: number,
+  householdId: number | string,
+) {
   return request(`/api/memberships`, {
     method: "POST",
     body: JSON.stringify({
@@ -38,6 +46,21 @@ export async function joinHousehold(profileId: number, householdId: number) {
       privs: 3, // regular user
       payInterval: 3,
     }),
+  });
+}
+
+// update a household
+export function updateHousehold(householdId: string, data: any) {
+  return request(`/api/households/${householdId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+// delete a household
+export function deleteHousehold(householdId: string) {
+  return request(`/api/households/${householdId}`, {
+    method: "DELETE",
   });
 }
 

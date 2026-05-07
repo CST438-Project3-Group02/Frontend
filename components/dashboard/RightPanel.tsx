@@ -1,7 +1,8 @@
 import { colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
+import Calendar from "./Calendar";
 
 export interface HouseholdStat {
   id: string;
@@ -50,6 +51,11 @@ const MOCK_TASKS: PendingTask[] = [
   { id: "1", title: "Clean the air filter", priority: "high" },
   { id: "2", title: "Trash pickup tomorrow", priority: "medium" },
   { id: "3", title: "Restock bathroom tissue", priority: "medium" },
+];
+
+const MOCK_EVENTS = [
+  { date: 7, title: "Internet Bill/Aug 7", color: colors.warning },
+  { date: 24, title: "Sarah's Birthday/Aug 24", color: colors.primary },
 ];
 
 function StatCard({
@@ -206,66 +212,75 @@ export default function RightPanel({
         borderLeftWidth: 1,
         borderLeftColor: colors.borderSoft,
         backgroundColor: colors.surface,
-        padding: 16,
+        height: "100%",
       }}
     >
-      <ThemedText
-        style={{
-          marginBottom: 16,
-          fontSize: 18,
-          fontWeight: "bold",
-          color: colors.text,
-        }}
+      <ScrollView
+        showsVerticalScrollIndicator={true}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ padding: 16 }}
       >
-        Household Stats
-      </ThemedText>
-
-      <View style={{ marginBottom: 24 }}>
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.id}
-            stat={stat}
-            onPress={() => onStatPress?.(stat.id)}
-          />
-        ))}
-      </View>
-
-      <View>
-        <View
+        <ThemedText
           style={{
-            marginBottom: 12,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
+            marginBottom: 16,
+            fontSize: 18,
+            fontWeight: "bold",
+            color: colors.text,
           }}
         >
-          <ThemedText
+          Household Stats
+        </ThemedText>
+
+        <View style={{ marginBottom: 24 }}>
+          {stats.map((stat) => (
+            <StatCard
+              key={stat.id}
+              stat={stat}
+              onPress={() => onStatPress?.(stat.id)}
+            />
+          ))}
+        </View>
+
+        {/* Calendar */}
+        <Calendar events={MOCK_EVENTS} />
+
+        <View>
+          <View
             style={{
-              fontWeight: "600",
-              color: colors.text,
+              marginBottom: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            Pending Tasks
-          </ThemedText>
-          <TouchableOpacity onPress={onViewMore}>
             <ThemedText
               style={{
-                fontSize: 12,
-                color: colors.primary,
+                fontWeight: "600",
+                color: colors.text,
               }}
             >
-              View All
+              Pending Tasks
             </ThemedText>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={onViewMore}>
+              <ThemedText
+                style={{
+                  fontSize: 12,
+                  color: colors.primary,
+                }}
+              >
+                View All
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+          {tasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onPress={() => onTaskPress?.(task.id)}
+            />
+          ))}
         </View>
-        {tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onPress={() => onTaskPress?.(task.id)}
-          />
-        ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }

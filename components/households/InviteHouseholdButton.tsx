@@ -15,7 +15,7 @@ import {
 import { ThemedText } from "../themed-text";
 
 // set to localhost for dev
-const inviteLink = "http://localhost:8081/join?invite_token=";
+const inviteLink = "https://roomie-28aj.vercel.app/join?invite_token=";
 
 export default function InviteHouseholdButton() {
   const [visible, setVisible] = useState(false);
@@ -25,7 +25,6 @@ export default function InviteHouseholdButton() {
 
   const { householdId } = useLocalSearchParams<{ householdId: string }>();
   const { profile } = useAuthContext();
-
 
   const onInvite = async () => {
       if (!profile) return;
@@ -110,7 +109,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
-    borderRadius: 8,
+    borderRadius: 36,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginHorizontal: 8,
@@ -133,8 +132,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalCard: {
-    width: "100%",
-    maxWidth: 724,
+    maxWidth: 450,
     maxHeight: 600,
     borderRadius: 34,
     padding: 28,
@@ -165,9 +163,9 @@ const styles = StyleSheet.create({
   },
   inviteLink: {
     maxWidth: "100%",
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.dark,
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.tertiary,
   },
   expiryText: {
     marginTop: 14,
